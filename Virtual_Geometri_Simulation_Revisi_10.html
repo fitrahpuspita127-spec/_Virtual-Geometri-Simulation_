@@ -1,0 +1,2887 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Virtual Geometri Simulation — Teori VSEPR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   TOKEN WARNA & HURUF
+   ========================================================= */
+:root{
+  --bg:#E4EFFF;
+  --bg2:#CFE2FF;
+  --panel:#FFFFFF;
+  --panel2:#EEF5FF;
+  --line:#8FB2E8;
+  --line-soft:#C5D9F5;
+  --text:#0A2342;
+  --text-dim:#27466F;
+  --text-faint:#46659A;
+  --gold:#C25E00;      /* atom pusat */
+  --teal:#1466D8;      /* pasangan elektron ikatan (PEI) / warna utama */
+  --violet:#7A35D9;    /* pasangan elektron bebas (PEB) */
+  --good:#0F7A4F;
+  --bad:#C62828;
+  --bond:#4F76B8;
+  --r:14px;
+  --f-disp:'Space Grotesk','Segoe UI',system-ui,sans-serif;
+  --f-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono','Cascadia Mono',Consolas,'DejaVu Sans Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none !important}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--f-body);
+  font-size:calc(15px*var(--tz,1));
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%;
+}
+h1,h2,h3,h4,.disp{font-family:var(--f-disp);font-weight:600;letter-spacing:-0.015em;line-height:1.15}
+button{font-family:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px}
+.hide{display:none !important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+sub,sup{font-size:.72em}
+
+/* =========================================================
+   LAYAR PEMBUKA
+   ========================================================= */
+#start{
+  min-height:100vh;min-height:100dvh;
+  display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:20px;
+  padding:clamp(20px,4vw,56px);
+  padding-top:calc(clamp(20px,4vw,56px) + env(safe-area-inset-top,0px));
+  background:linear-gradient(145deg,#0B2F8F 0%,#1556D6 52%,#2E8BFF 100%);
+  --text:#FFFFFF; --text-dim:#E3EEFF; --text-faint:#C4DAFB; --line:#7FA8EC; --line-soft:rgba(255,255,255,.25);
+  --teal:#9CD0FF; --gold:#FFC76B;
+  color:#fff;
+}
+#start .btn{color:#0A2342}
+#start .btn.solid{background:#FFFFFF;border-color:#FFFFFF;color:#0B2F8F}
+#start .route b{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);color:#fff}
+#start .kicker{color:#CFE6FF}
+#start .kicker::before{background:#9CD0FF;box-shadow:0 0 9px #9CD0FF}
+#start .start-stage{background:#fff;border-radius:22px;padding:6px;box-shadow:0 18px 40px rgba(5,25,80,.35)}
+#start .hero-tag{color:#27466F}
+#start .hero-tag b{color:#0A2342}
+#start .goal{--text:#0A2342;--text-dim:#27466F;--teal:#1466D8;color:#0A2342}
+#start .start-foot{color:#DCEBFF;border-top-color:rgba(255,255,255,.28)}
+@media(max-width:880px){#start{grid-template-columns:1fr;gap:6px;padding-bottom:40px}}
+.start-copy{max-width:36rem}
+.kicker{
+  font-family:var(--f-mono);font-size:calc(12px*var(--tz,1));letter-spacing:.13em;color:var(--teal);
+  display:flex;align-items:center;gap:9px;margin-bottom:16px;
+}
+.kicker::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 9px var(--teal)}
+#start h1{font-size:clamp(30px,5.2vw,50px);font-weight:700;margin-bottom:16px}
+#start .lede{color:var(--text-dim);font-size:clamp(15px,1.7vw,17px);margin-bottom:26px;max-width:34rem}
+.route{
+  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px;align-items:center;
+  font-family:var(--f-mono);font-size:calc(12px*var(--tz,1));color:var(--text-faint);
+}
+.route b{
+  font-weight:500;color:var(--text-dim);background:var(--panel);
+  border:1px solid var(--line);border-radius:99px;padding:4px 11px;
+}
+.route i{font-style:normal;color:var(--teal)}
+.cta{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:10px 16px;font-size:calc(14px*var(--tz,1));font-weight:500;transition:border-color .15s,background .15s;
+}
+.btn:hover:not(:disabled){border-color:var(--teal);background:var(--panel2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.solid{background:var(--teal);border-color:var(--teal);color:#FFFFFF;font-weight:600}
+.btn.solid:hover:not(:disabled){background:var(--teal);filter:brightness(1.08)}
+.btn.lg{padding:13px 24px;font-size:calc(15px*var(--tz,1))}
+.btn.sm{padding:6px 11px;font-size:calc(12.5px*var(--tz,1));border-radius:8px}
+.btn.on{border-color:var(--teal);background:var(--panel2);color:var(--teal)}
+.start-stage{position:relative}
+#heroCv{display:block;width:100%;height:auto;border-radius:20px}
+.hero-tag{
+  position:absolute;left:50%;bottom:6px;transform:translateX(-50%);
+  font-family:var(--f-mono);font-size:calc(12.5px*var(--tz,1));color:var(--text-faint);text-align:center;
+  white-space:nowrap;
+}
+.hero-tag b{color:var(--text-dim);font-weight:500}
+.start-foot{
+  grid-column:1/-1;margin-top:18px;padding-top:16px;border-top:1px solid var(--line-soft);
+  font-size:calc(12.5px*var(--tz,1));color:var(--text-faint);display:flex;flex-wrap:wrap;gap:6px 18px;
+}
+
+/* =========================================================
+   RANGKA APLIKASI
+   ========================================================= */
+#app{display:grid;grid-template-columns:262px 1fr;min-height:100vh}
+@media(max-width:940px){#app{grid-template-columns:1fr}}
+.side{
+  background:var(--bg2);border-right:1px solid var(--line);
+  padding:20px 14px;position:sticky;top:0;height:100vh;overflow-y:auto;
+  display:flex;flex-direction:column;gap:14px;
+}
+@media(max-width:940px){
+  .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);
+        padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px))}
+  .side.collapsed .side-body{display:none}
+}
+.side-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.brand{font-family:var(--f-disp);font-size:calc(15px*var(--tz,1));font-weight:600}
+.brand span{color:var(--teal)}
+.brand small{display:block;font-family:var(--f-body);font-size:calc(11.5px*var(--tz,1));color:var(--text-faint);font-weight:400;letter-spacing:0}
+.icon-btn{
+  background:var(--panel);border:1px solid var(--line);border-radius:9px;
+  width:34px;height:34px;display:grid;place-items:center;font-size:calc(14px*var(--tz,1));flex-shrink:0;
+}
+.icon-btn:hover{border-color:var(--teal)}
+#sideToggle{display:none}
+@media(max-width:940px){#sideToggle{display:grid}}
+.side-body{display:flex;flex-direction:column;gap:14px}
+.prog{display:flex;flex-direction:column;gap:6px}
+.prog-track{height:5px;border-radius:5px;background:var(--panel);border:1px solid var(--line);overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--violet));width:0%;transition:width .45s ease}
+.prog-txt{font-family:var(--f-mono);font-size:calc(11px*var(--tz,1));color:var(--text-faint);display:flex;justify-content:space-between}
+nav.steps{display:flex;flex-direction:column;gap:3px}
+.step-btn{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:9px 10px;border-radius:10px;border:1px solid transparent;background:none;
+  color:var(--text-dim);font-size:calc(13.2px*var(--tz,1));transition:.15s;
+}
+.step-btn .no{
+  width:23px;height:23px;border-radius:50%;border:1.5px solid var(--line);flex-shrink:0;
+  display:grid;place-items:center;font-family:var(--f-mono);font-size:calc(11px*var(--tz,1));color:var(--text-faint);
+}
+.step-btn:not(.locked):hover{background:var(--panel);color:var(--text)}
+.step-btn.active{background:var(--panel);color:var(--text);border-color:var(--line)}
+.step-btn.active .no{border-color:var(--teal);color:var(--teal)}
+.step-btn.done .no{background:var(--good);border-color:var(--good);color:#FFFFFF}
+.step-btn.locked{opacity:.38;cursor:not-allowed}
+.side-note{
+  font-size:calc(11.5px*var(--tz,1));color:var(--text-faint);border-top:1px solid var(--line-soft);padding-top:12px;margin-top:auto;
+}
+
+/* =========================================================
+   ISI UTAMA
+   ========================================================= */
+main{min-width:0;padding-bottom:70px}
+.topbar{
+  position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(9px);border-bottom:1px solid var(--line-soft);
+  padding:12px clamp(16px,3.4vw,40px);display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;
+}
+@supports not (backdrop-filter:blur(2px)){.topbar{background:var(--bg)}}
+.topbar .where{font-family:var(--f-mono);font-size:calc(11.5px*var(--tz,1));color:var(--text-faint);letter-spacing:.06em}
+.molpick{display:flex;flex-wrap:wrap;gap:5px;margin-left:auto;align-items:center}
+.molpick .lbl{font-size:calc(11.5px*var(--tz,1));color:var(--text-faint);margin-right:2px}
+.mol-btn{
+  font-family:var(--f-mono);font-size:calc(12.5px*var(--tz,1));padding:5px 11px;border-radius:99px;
+  background:var(--panel);border:1px solid var(--line);color:var(--text-dim);transition:.15s;
+}
+.mol-btn:hover{border-color:var(--teal);color:var(--text)}
+.mol-btn.active{background:rgba(20,102,216,.12);border-color:var(--teal);color:var(--teal)}
+.mol-btn .tick{color:var(--good);margin-left:4px}
+.view{padding:clamp(22px,3.4vw,44px) clamp(16px,3.4vw,40px) 0;max-width:1140px}
+.view[hidden]{display:none}
+.tag{font-family:var(--f-mono);font-size:calc(11.5px*var(--tz,1));letter-spacing:.11em;color:var(--teal);margin-bottom:9px}
+.view h2{font-size:clamp(23px,3.2vw,32px);margin-bottom:12px}
+.lede{color:var(--text-dim);max-width:62ch;margin-bottom:22px}
+p{max-width:68ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.panel + .panel{margin-top:14px}
+.panel h3{font-size:calc(17px*var(--tz,1));margin-bottom:9px}
+.panel p{font-size:calc(14.2px*var(--tz,1));color:var(--text-dim)}
+.panel p + p{margin-top:9px}
+.panel strong,.panel b{color:var(--text);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+.section-gap{margin-top:16px}
+
+/* kartu menu utama */
+.hub{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:980px){.hub{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.hub{grid-template-columns:1fr}}
+.hub-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;
+  text-align:left;display:flex;flex-direction:column;gap:7px;min-height:148px;transition:.15s;
+}
+.hub-card:hover:not(:disabled){border-color:var(--teal);transform:translateY(-2px)}
+.hub-card:disabled{opacity:.42;cursor:not-allowed}
+.hub-card .hn{font-family:var(--f-mono);font-size:calc(11.5px*var(--tz,1));color:var(--text-faint);display:flex;justify-content:space-between}
+.hub-card .hn em{font-style:normal;color:var(--good)}
+.hub-card h4{font-size:calc(16.5px*var(--tz,1))}
+.hub-card p{font-size:calc(13px*var(--tz,1));color:var(--text-dim);margin:0}
+
+/* istilah dengan penjelasan */
+.term{
+  border-bottom:2px dotted var(--teal);cursor:pointer;-webkit-tap-highlight-color:transparent;position:relative;color:var(--text);font-weight:500;
+  text-decoration:none;display:inline-block;
+}
+.term:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:3px}
+.term:hover{color:var(--teal)}
+.term .pop{
+  display:none;position:absolute;left:0;bottom:calc(100% + 9px);width:min(290px,72vw);z-index:60;text-align:left;white-space:normal;font-family:var(--f-body);letter-spacing:0;text-transform:none;
+  background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;
+  font-size:calc(12.6px*var(--tz,1));line-height:1.55;color:var(--text-dim);font-weight:400;
+  box-shadow:0 14px 30px rgba(10,35,66,.22);
+}
+.term.open .pop{display:block}
+.term .pop.below{bottom:auto;top:calc(100% + 9px)}
+.term.open{color:var(--teal)}
+.term .pop b{color:var(--teal)}
+
+/* rumus & catatan */
+.formula{
+  font-family:var(--f-mono);font-size:calc(15px*var(--tz,1));background:var(--bg2);border:1px solid var(--line);
+  border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:14px 16px;margin:14px 0;
+  color:var(--text);line-height:1.9;overflow-x:auto;
+}
+.formula .sub{display:block;font-family:var(--f-body);font-size:calc(12.5px*var(--tz,1));color:var(--text-faint);margin-top:8px}
+.note{
+  background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--violet);
+  border-radius:0 10px 10px 0;padding:13px 15px;margin-top:14px;font-size:calc(13.4px*var(--tz,1));color:var(--text-dim);
+}
+.note .nt{font-family:var(--f-mono);font-size:calc(11px*var(--tz,1));letter-spacing:.1em;color:var(--violet);display:block;margin-bottom:5px}
+.note.macro{border-left-color:var(--gold)}
+.note.macro .nt{color:var(--gold)}
+
+/* daftar bernomor proses */
+ol.flow{list-style:none;counter-reset:f;display:flex;flex-direction:column;gap:11px;margin-top:6px}
+ol.flow li{counter-increment:f;position:relative;padding-left:34px;font-size:calc(14px*var(--tz,1));color:var(--text-dim)}
+ol.flow li::before{
+  content:counter(f);position:absolute;left:0;top:1px;width:23px;height:23px;border-radius:50%;
+  border:1px solid var(--teal);color:var(--teal);font-family:var(--f-mono);font-size:calc(11px*var(--tz,1));
+  display:grid;place-items:center;
+}
+ul.dash{list-style:none;display:flex;flex-direction:column;gap:7px;font-size:calc(13.8px*var(--tz,1));color:var(--text-dim)}
+ul.dash li{padding-left:16px;position:relative}
+ul.dash li::before{content:'';position:absolute;left:0;top:10px;width:8px;height:1px;background:var(--text-faint)}
+
+/* panggung kanvas */
+.stage{
+  position:relative;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+}
+.stage canvas{display:block;width:100%;touch-action:none;cursor:grab}
+.stage canvas.grab{cursor:grabbing}
+.stage canvas.cross{cursor:crosshair}
+.stage-bar{display:flex;flex-wrap:wrap;gap:6px;padding:10px;border-top:1px solid var(--line-soft);background:var(--panel)}
+.stage-hint{
+  position:absolute;top:10px;left:12px;font-family:var(--f-mono);font-size:calc(11px*var(--tz,1));color:var(--text-faint);
+  background:color-mix(in srgb,var(--bg2) 82%,transparent);padding:2px 7px;border-radius:6px;pointer-events:none;
+}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:calc(12px*var(--tz,1));color:var(--text-dim);margin-top:10px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:baseline}
+
+/* pembacaan data */
+.readout dl{display:grid;grid-template-columns:auto 1fr;margin:0}
+.readout dt{font-size:calc(12.8px*var(--tz,1));color:var(--text-faint);padding:8px 12px 8px 0;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+.readout dd{padding:8px 0;border-bottom:1px solid var(--line-soft);text-align:right;font-size:calc(13.8px*var(--tz,1))}
+.readout dl>:nth-last-child(1),.readout dl>:nth-last-child(2){border-bottom:0}
+.mono{font-family:var(--f-mono)}
+.key{font-family:var(--f-mono);color:var(--teal);font-weight:500;font-size:calc(15px*var(--tz,1))}
+
+/* pilihan jawaban */
+.ask{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-top:16px}
+.ask .qh{font-family:var(--f-mono);font-size:calc(11px*var(--tz,1));letter-spacing:.1em;color:var(--gold);margin-bottom:7px}
+.ask .q{font-size:calc(14.8px*var(--tz,1));font-weight:600;margin-bottom:12px;max-width:62ch}
+.opts{display:flex;flex-direction:column;gap:6px;max-width:58ch}
+.opt{
+  text-align:left;background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+  padding:10px 13px;font-size:calc(13.8px*var(--tz,1));transition:.14s;
+}
+.opt:hover:not(:disabled){border-color:var(--teal)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--bg2));color:var(--text)}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,var(--bg2));color:var(--text)}
+.gstep{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:12px}
+.gstep.done{border-color:var(--good)}
+.gstep .gn{font-family:var(--f-mono);font-size:calc(11px*var(--tz,1));letter-spacing:.08em;color:var(--teal);margin-bottom:5px}
+.gstep .gq{font-size:calc(14.6px*var(--tz,1));font-weight:600;margin-bottom:10px;max-width:62ch;color:var(--text)}
+.ask .intro{font-size:calc(14.4px*var(--tz,1));font-weight:500;color:var(--text);margin-bottom:2px;max-width:64ch}
+.gfin{margin-top:12px;padding:11px 14px;border-radius:10px;background:color-mix(in srgb,var(--good) 12%,#fff);border:1px solid var(--good);color:var(--text);font-size:calc(13.8px*var(--tz,1));font-weight:600}
+.chips-row{display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 2px}
+.chips-row>span{font-size:calc(12.8px*var(--tz,1));padding:5px 11px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--text)}
+.fb{margin-top:11px;font-size:calc(13.4px*var(--tz,1));color:var(--text-dim);border-top:1px solid var(--line);padding-top:10px;max-width:62ch}
+.fb b{color:var(--text)}
+.fb.ok b{color:var(--good)}
+.fb.no b{color:var(--bad)}
+.chipset{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font-family:var(--f-mono);font-size:calc(13px*var(--tz,1));min-width:42px;padding:7px 13px;border-radius:9px;
+  background:var(--bg2);border:1px solid var(--line);color:var(--text-dim);
+}
+.chip:hover:not(:disabled){border-color:var(--teal)}
+.chip.sel{background:rgba(20,102,216,.12);border-color:var(--teal);color:var(--teal)}
+.chip.sel.v{background:rgba(122,53,217,.12);border-color:var(--violet);color:var(--violet)}
+.chip:disabled{cursor:default}
+.pair-in{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:14px}
+.pair-in .fld{display:flex;flex-direction:column;gap:7px}
+.pair-in .fld > span{font-size:calc(12.6px*var(--tz,1));color:var(--text-faint)}
+
+/* tabel rangkuman */
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:calc(13.4px*var(--tz,1));min-width:680px}
+th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--line-soft)}
+th{font-size:calc(12px*var(--tz,1));color:var(--text-faint);font-weight:500;background:var(--panel2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.n{font-family:var(--f-mono);white-space:nowrap}
+tr.pending td{color:var(--text-faint)}
+.mini{background:none;border:0;color:var(--teal);font-size:calc(12.5px*var(--tz,1));text-decoration:underline;padding:0}
+
+/* langkah lewis */
+.lewis-wrap{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:10px}
+#lewisSvg{display:block;width:100%;height:auto}
+.narration{
+  font-size:calc(13.6px*var(--tz,1));color:var(--text-dim);background:var(--panel2);border:1px solid var(--line);
+  border-radius:10px;padding:12px 14px;margin-top:10px;min-height:66px;
+}
+.narration b{color:var(--text)}
+.count-pill{
+  font-family:var(--f-mono);font-size:calc(12.5px*var(--tz,1));padding:4px 10px;border-radius:99px;
+  border:1px solid var(--line);background:var(--bg2);color:var(--text-dim);
+}
+
+/* diagram kulit atom */
+.atomcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;gap:16px;align-items:flex-start}
+@media(max-width:520px){.atomcard{flex-direction:column;align-items:stretch}}
+.atomcard svg{flex-shrink:0;width:176px;height:auto}
+@media(max-width:520px){.atomcard svg{align-self:center}}
+.atomcard .who{font-family:var(--f-mono);font-size:calc(11.5px*var(--tz,1));color:var(--text-faint);letter-spacing:.08em}
+.atomcard h4{font-size:calc(17px*var(--tz,1));margin:2px 0 8px}
+.atomcard dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:calc(13.2px*var(--tz,1));margin-top:4px}
+.atomcard dt{color:var(--text-faint)}
+.atomcard dd{font-family:var(--f-mono);text-align:right}
+.val-hi{color:var(--gold)}
+
+/* skor akhir */
+.score{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;background:var(--panel);
+  border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 var(--r) var(--r) 0;
+  padding:14px 17px;margin-bottom:14px;
+}
+.score b{font-family:var(--f-mono);font-size:calc(23px*var(--tz,1));font-weight:600}
+.score span{font-size:calc(13.4px*var(--tz,1));color:var(--text-dim)}
+.nav-foot{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;padding-top:18px;border-top:1px solid var(--line-soft)}
+.foot-note{margin-top:34px;padding-top:16px;border-top:1px solid var(--line-soft);font-size:calc(12.4px*var(--tz,1));color:var(--text-faint);max-width:70ch}
+.done-banner{
+  background:color-mix(in srgb,var(--good) 12%,var(--panel));border:1px solid var(--good);
+  border-radius:var(--r);padding:16px 18px;margin-top:16px;font-size:calc(14px*var(--tz,1));
+}
+.done-banner b{color:var(--good)}
+
+@media(prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+@media print{.side,.topbar,.nav-foot,.stage-bar{display:none}.view[hidden]{display:block}#app{grid-template-columns:1fr}}
+.start-goals{grid-column:1/-1;display:grid;grid-template-columns:1fr 1.3fr;gap:14px;margin-top:6px}
+.goal{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.goal h3{font-size:calc(15px*var(--tz,1));margin-bottom:8px;color:var(--teal)}
+.goal p,.goal li{font-size:calc(13.6px*var(--tz,1));color:var(--text-dim);line-height:1.6}
+.goal ol{padding-left:18px}
+@media(max-width:880px){.start-goals{grid-template-columns:1fr}}
+
+/* =========================================================
+   TAMBAHAN VERSI RINGKAS
+   ========================================================= */
+.tp{display:inline-block;font-family:var(--f-mono);font-size:calc(11px*var(--tz,1));letter-spacing:.06em;background:var(--teal);color:#fff;border-radius:99px;padding:2px 10px;margin-left:8px;vertical-align:1px}
+.view h2 .mol{color:var(--teal)}
+.view h2 small{font-family:var(--f-body);font-size:.5em;font-weight:500;color:var(--text-faint);letter-spacing:0;margin-left:6px}
+
+/* masalah pemantik */
+.duel{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;margin:8px 0 6px}
+.mcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 16px 16px;text-align:center}
+.mcard svg{width:100%;max-width:200px;height:auto;display:block;margin:0 auto 4px}
+.mcard .f{font-family:var(--f-disp);font-size:calc(28px*var(--tz,1));font-weight:700;line-height:1.1}
+.mcard .s{font-size:calc(13.2px*var(--tz,1));color:var(--text-dim);margin-top:4px}
+.mcard .qm{display:inline-block;margin-top:10px;padding:4px 14px;border-radius:99px;background:rgba(122,53,217,.12);color:var(--violet);font-family:var(--f-mono);font-size:calc(12px*var(--tz,1));font-weight:500}
+.vs{font-family:var(--f-mono);font-size:calc(13px*var(--tz,1));color:var(--text-faint);letter-spacing:.1em}
+@media(max-width:700px){.duel{grid-template-columns:1fr}.vs{text-align:center}}
+.opt.pick{border-color:var(--teal);background:rgba(20,102,216,.12);color:var(--text)}
+
+/* blok kerja dalam satu misi */
+.blk{margin-top:26px}
+.blk>.ask,.blk .askwrap .ask{margin-top:12px}
+.bh{display:flex;align-items:center;gap:10px;font-family:var(--f-disp);font-weight:600;font-size:calc(17px*var(--tz,1));margin-bottom:12px}
+.bn{width:28px;height:28px;border-radius:9px;background:var(--teal);color:#fff;display:grid;place-items:center;font-family:var(--f-mono);font-size:calc(13px*var(--tz,1));flex-shrink:0}
+.askwrap{position:relative}
+.lockov{
+  position:absolute;inset:12px 0 0 0;border-radius:var(--r);display:grid;place-items:center;text-align:center;
+  padding:16px;background:rgba(228,239,255,.88);backdrop-filter:blur(3px);
+  font-size:calc(14px*var(--tz,1));font-weight:600;color:var(--text-dim);z-index:2;border:1px dashed var(--line);
+}
+.resbox{margin-top:14px;border-color:var(--good)}
+.res-h{font-family:var(--f-disp);font-weight:600;font-size:calc(16px*var(--tz,1));margin-bottom:10px;color:var(--good)}
+.resrow{display:flex;flex-wrap:wrap;gap:10px}
+.resrow span{flex:1;min-width:96px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 13px;font-size:calc(12px*var(--tz,1));color:var(--text-faint);display:flex;flex-direction:column;gap:2px}
+.resrow b{font-family:var(--f-mono);font-size:calc(21px*var(--tz,1));color:var(--teal);font-weight:600}
+.resbox .formula{margin:12px 0 0;font-size:calc(13.5px*var(--tz,1));padding:10px 14px}
+.lockpanel{border-style:dashed;margin-top:8px}
+.lockpanel p{margin-bottom:12px;color:var(--text)}
+.chip-real{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:calc(13.4px*var(--tz,1));color:var(--text-dim);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;padding:11px 14px}
+.chip-real b{color:var(--gold);font-family:var(--f-mono);font-size:calc(11px*var(--tz,1));letter-spacing:.08em;white-space:nowrap;padding-top:2px}
+
+/* misi 5 */
+.hypcheck{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--violet);border-radius:0 12px 12px 0;padding:12px 16px;margin-bottom:16px;font-size:calc(14.5px*var(--tz,1));max-width:70ch}
+.alur{display:flex;flex-direction:column;gap:7px;max-width:64ch}
+.alur button{
+  display:flex;align-items:center;gap:11px;text-align:left;background:var(--bg2);border:1px solid var(--line);
+  border-radius:10px;padding:10px 13px;font-size:calc(13.8px*var(--tz,1));transition:.14s;
+}
+.alur button:hover:not(:disabled){border-color:var(--teal)}
+.alur button .num{
+  width:24px;height:24px;border-radius:50%;border:1.5px dashed var(--line);flex-shrink:0;display:grid;place-items:center;
+  font-family:var(--f-mono);font-size:calc(12px*var(--tz,1));color:transparent;
+}
+.alur button.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--bg2))}
+.alur button.right .num{background:var(--good);border:0;color:#fff}
+.alur button:disabled{cursor:default}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.alur button.shake{animation:shk .28s;border-color:var(--bad)}
+.badge{display:inline-flex;align-items:center;gap:8px;margin-top:10px;background:var(--teal);color:#fff;border-radius:99px;padding:6px 16px;font-family:var(--f-disp);font-weight:600;font-size:calc(14px*var(--tz,1))}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(20,102,216,.45)}100%{box-shadow:0 0 0 12px rgba(20,102,216,0)}}
+.nav-foot .btn.solid:not(:disabled){animation:pulse 1.8s ease-out 3}
+
+/* ---------- tambahan dari review dosen & teman ---------- */
+.tools{margin-left:auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.molpick{margin-left:0}
+.tsz{display:flex;align-items:center;gap:5px}
+.tsz .lbl{font-size:calc(11.5px*var(--tz,1));color:var(--text-faint);margin-right:2px}
+.tsz button{font-family:var(--f-mono);font-size:calc(12.5px*var(--tz,1));min-width:34px;padding:4px 8px;border-radius:8px;background:var(--panel);border:1px solid var(--line);color:var(--text-dim)}
+.tsz button:hover{border-color:var(--teal);color:var(--text)}
+.kamus{font-size:calc(12.5px*var(--tz,1));color:var(--text-dim);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 11px}
+.kamus summary{cursor:pointer;font-weight:600;color:var(--text)}
+.kamus dl{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;margin-top:8px}
+.kamus dt{font-family:var(--f-mono);font-weight:600;color:var(--teal)}
+.kamus dd{line-height:1.45}
+.idrow{display:flex;flex-wrap:wrap;gap:10px 18px;margin:2px 0 14px}
+.idrow label{display:flex;align-items:center;gap:8px;font-size:calc(13px*var(--tz,1));color:var(--text-dim)}
+.idrow input{font:inherit;font-size:calc(14px*var(--tz,1));padding:7px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);min-width:0;width:min(210px,56vw)}
+.idrow input:focus{outline:2px solid var(--teal);outline-offset:1px}
+.howto{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:calc(13.4px*var(--tz,1));color:var(--text-dim)}
+.howto summary{cursor:pointer;font-weight:600;color:var(--text)}
+.howgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 16px;margin:10px 0 6px}
+.howgrid span{line-height:1.45}
+.howgrid b{color:var(--teal)}
+@media(max-width:620px){.howgrid{grid-template-columns:1fr}}
+.howto p{margin-top:6px;font-size:calc(12.6px*var(--tz,1))}
+.tpline{font-size:calc(13.4px*var(--tz,1));color:var(--text-dim);margin:2px 0 10px;padding:7px 12px;background:var(--panel);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;max-width:64ch}
+.tpline b{color:var(--text)}
+.chips-row.terms>span{font-size:calc(12.6px*var(--tz,1))}
+.ask .qh{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.foldbtn{font-family:var(--f-body);font-size:calc(12px*var(--tz,1));letter-spacing:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px 10px;color:var(--text-dim)}
+.foldbtn:hover{border-color:var(--teal)}
+.ask.fold .gstep,.ask.fold .gfin,.ask.fold .intro{display:none}
+.chip-real.why{border-left-color:var(--teal)}
+.chip-real.why b{color:var(--teal)}
+textarea{width:100%;font:inherit;font-size:calc(14px*var(--tz,1));line-height:1.55;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);resize:vertical;max-width:68ch;display:block}
+textarea:focus{outline:2px solid var(--teal);outline-offset:1px}
+.kw{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.kw span{font-size:calc(12.8px*var(--tz,1));padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:var(--bg2);color:var(--text-faint)}
+.kw span.on{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,#fff);color:var(--text)}
+.adapt{margin-top:14px;border-left:4px solid var(--gold)}
+.adapt h3{font-size:calc(16px*var(--tz,1));margin-bottom:6px}
+.adapt .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.reading a{color:var(--teal);font-weight:600}
+.reading p{margin-top:6px}
+.printhead{display:none}
+@media(max-width:640px){
+  body{font-size:calc(16px*var(--tz,1))}
+  .opt,.alur button{font-size:calc(15px*var(--tz,1))}
+  .fb,.readout dt,.readout dd,.narration,.howto,.kamus,.tpline,.lede{font-size:calc(14.5px*var(--tz,1))}
+  .tag,.stage-hint,.legend,.chips-row span{font-size:calc(12.5px*var(--tz,1))}
+  .gstep .gq,.ask .q{font-size:calc(15.5px*var(--tz,1))}
+}
+@media print{
+  .side,.topbar,.nav-foot,.btn,#alurBox button,.foldbtn,.howto,.adapt,.reading a,#btnTulis,#btnContoh{display:none !important}
+  .printhead{display:block;font-size:calc(14px*var(--tz,1));margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #999}
+  body{background:#fff}
+  .view{max-width:none}
+}
+
+.opt.elim{opacity:.4;text-decoration:line-through}
+.audio-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.audio-status{font-size:11px;color:var(--text-faint);min-width:82px}
+.audio-tools button:disabled{opacity:.48;cursor:not-allowed}
+@media(max-width:640px){
+  .audio-tools{width:100%;justify-content:flex-end}
+  .audio-status{display:none}
+  .topbar{align-items:flex-start;gap:8px}
+  .tools{flex-wrap:wrap;justify-content:flex-end}
+}
+
+/* =========================================================
+   REVISI 3
+   ========================================================= */
+.todo{font-size:calc(14px*var(--tz,1));color:var(--text-dim);background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;padding:10px 14px;margin:0 0 14px;max-width:72ch;line-height:1.6}
+.todo b{color:var(--text)}
+.askwrap>.ask{margin-top:12px}
+.chip.seen{border-color:var(--good)}
+.panel p.ref{padding-left:2em;text-indent:-2em;overflow-wrap:anywhere;font-size:calc(13px*var(--tz,1));max-width:78ch}
+.hero-tag{white-space:normal;width:92%;text-align:center}
+.tpsum{margin-top:10px}
+@media(max-width:640px){
+  .topbar{position:relative}
+  .btn{min-height:44px}
+  .btn.sm,.mol-btn,.tsz button,.chip{min-height:40px}
+  .icon-btn{width:40px;height:40px}
+  .step-btn{padding:11px 10px}
+  .opt,.alur button{padding:12px 14px}
+  .nav-foot .btn{flex:1 1 auto}
+  .view{padding-left:14px;padding-right:14px}
+}
+
+/* =========================================================
+   REVISI 4
+   ========================================================= */
+.spot{outline:3px solid var(--gold);outline-offset:5px;border-radius:12px;animation:spotp 1.1s ease-in-out infinite}
+@keyframes spotp{50%{outline-color:transparent}}
+.caption{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:70;max-width:min(680px,92vw);padding:11px 16px;border-radius:14px;background:var(--text);color:#fff;font-size:calc(14.5px*var(--tz,1));line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.28);text-align:center}
+.caption[hidden]{display:none}
+#lewisSvg{touch-action:none;user-select:none;-webkit-user-select:none}
+#lewisSvg .lg{cursor:grab}
+#lewisSvg .lg.dn{cursor:default}
+body.dragging,body.dragging *{user-select:none !important;-webkit-user-select:none !important;cursor:grabbing !important}
+.lgp{animation:lgp 1.4s ease-in-out infinite}
+@keyframes lgp{0%,100%{stroke-opacity:.2}50%{stroke-opacity:.95}}
+.todo{font-size:calc(14px*var(--tz,1))}
+.goal h4{margin:12px 0 4px;font-size:calc(13.5px*var(--tz,1))}
+@media print{.caption{display:none !important}}
+.psheet{display:none}
+.stepper{display:flex;align-items:center;gap:10px;margin:6px 0}
+.stepper b.v{min-width:30px;text-align:center;font-family:var(--f-mono);font-size:calc(20px*var(--tz,1))}
+.stepper .lab{min-width:44px;font-family:var(--f-mono);font-size:calc(13px*var(--tz,1));color:var(--text-dim)}
+.stepper .btn{padding:4px 14px;font-size:calc(18px*var(--tz,1));line-height:1.1}
+.patbars{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.patbars .pb{display:grid;grid-template-columns:104px 1fr 62px;gap:8px;align-items:center;font-size:calc(12.5px*var(--tz,1))}
+.patbars .pb .bar{height:14px;border-radius:8px;background:linear-gradient(90deg,#9B5CF0,#3D8BF2)}
+.patbars .pb span.a{font-family:var(--f-mono);text-align:right}
+.capai{display:flex;flex-direction:column;gap:7px;margin:8px 0 0}
+.capai .ci{display:grid;grid-template-columns:26px 1fr;gap:8px;align-items:start;font-size:calc(13.5px*var(--tz,1));color:var(--text-dim);line-height:1.5}
+.capai .ci i{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:13px;color:#fff}
+.capai .ci.ok{color:var(--text)}
+.capai .ci.ok i{background:var(--good);border-color:var(--good)}
+@media print{
+  @page{size:A4;margin:15mm}
+  html,body{background:#fff !important;color:#111 !important}
+  body>*:not(#printSheet){display:none !important}
+  .psheet{display:block !important;font-family:var(--f-body,system-ui,sans-serif);font-size:11.5pt;line-height:1.5;color:#111}
+  .psheet h1{font-size:18pt;margin:0 0 2pt;color:#0B3A7A}
+  .psheet .sub{color:#555;font-size:10.5pt;margin-bottom:8pt}
+  .psheet .id{display:flex;gap:18pt;border-top:1.5pt solid #0B3A7A;border-bottom:.6pt solid #999;padding:5pt 0;margin-bottom:10pt;font-size:11pt}
+  .psheet h2{font-size:12.5pt;margin:12pt 0 4pt;color:#0B3A7A;break-after:avoid}
+  .psheet table{width:100%;border-collapse:collapse;font-size:10pt;break-inside:avoid}
+  .psheet th,.psheet td{border:.6pt solid #888;padding:4pt 5pt;text-align:center}
+  .psheet th{background:#E6EEF9}
+  .psheet td:first-child{text-align:left;font-weight:700}
+  .psheet .box{border:.8pt solid #888;border-radius:4pt;padding:7pt 9pt;min-height:44pt;white-space:pre-wrap;break-inside:avoid}
+  .psheet ol{margin:2pt 0 0 16pt;padding:0}
+  .psheet li{margin-bottom:2pt}
+  .psheet p{margin:3pt 0}
+  .psheet .foot{margin-top:14pt;padding-top:5pt;border-top:.6pt solid #999;color:#666;font-size:9pt}
+  .psheet .goalbox h3{font-size:11pt;margin:0 0 3pt;color:#111}
+  .psheet .goalbox p,.psheet .goalbox li{font-size:10.5pt;color:#222}
+}
+.lwsteps{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.lwsteps span{font-family:var(--f-mono);font-size:calc(11.5px*var(--tz,1));padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--text-faint);background:var(--panel)}
+.lwsteps span.on{border-color:var(--teal);color:var(--teal);font-weight:700}
+.lwsteps span.ok{border-color:var(--good);color:var(--good)}
+.evbar{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 8px}
+.evbar i{width:19px;height:19px;border-radius:50%;border:2px solid var(--line);background:var(--panel2);display:inline-block}
+.evbar i.u{background:#29A8E8;border-color:#1466D8}
+.evbar i.f{background:#F2B134;border-color:#C25E00}
+.evbar i.p{background:#9B5CF0;border-color:#5B24A8}
+.evcap{font-size:calc(12.8px*var(--tz,1));color:var(--text-dim);line-height:1.55}
+.lpctl input[type=range]{width:100%;accent-color:var(--violet);margin:6px 0 2px}
+.lpctl .lprow{display:flex;justify-content:space-between;gap:8px;font-size:calc(12px*var(--tz,1));color:var(--text-dim)}
+.lgdot{box-shadow:inset 0 0 0 1px rgba(0,0,0,.28)}
+@keyframes orbspin{to{transform:rotate(360deg)}}
+.orb{transform-origin:70px 70px;animation:orbspin 16s linear infinite}
+.orb.r{animation-direction:reverse}
+@media (prefers-reduced-motion:reduce){.orb{animation:none}}
+.vol{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--text-dim)}
+.vol input{width:64px;accent-color:var(--teal)}
+.nucleg{display:flex;flex-wrap:wrap;gap:10px;font-size:calc(11.5px*var(--tz,1));color:var(--text-dim);margin-top:8px}
+.nucleg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.repbars{display:flex;flex-direction:column;gap:7px;margin:8px 0}
+.repbars .rb{display:grid;grid-template-columns:92px 1fr;align-items:center;gap:8px;font-family:var(--f-mono);font-size:calc(12px*var(--tz,1))}
+.repbars .rb span.bar{display:block;height:12px;border-radius:7px}
+</style>
+</head>
+<body>
+
+<!-- ===================== LAYAR PEMBUKA ===================== -->
+<div id="start">
+  <div class="start-copy">
+    <div class="kicker">VIRTUAL GEOMETRI SIMULATION · KIMIA KELAS X</div>
+    <h1>Sama-sama mengikat 3 atom.<br>Kenapa bentuknya beda?</h1>
+    <p class="lede">Selidiki sendiri lewat simulasi: dari elektron valensi sampai bentuk molekul NH₃ dan SO₃.</p>
+
+    <div class="route">
+      <b>Dugaan</b><i>&rsaquo;</i>
+      <b>Tolakan</b><i>&rsaquo;</i>
+      <b>Hitung</b><i>&rsaquo;</i>
+      <b>Bentuk 3D</b><i>&rsaquo;</i>
+      <b>Jawab</b>
+    </div>
+
+    <div class="cta">
+      <button class="btn solid lg" id="btnMulai">Mulai menyelidiki</button>
+      <button class="btn lg" id="btnLanjut" hidden>Lanjutkan</button>
+    </div>
+  </div>
+
+  <div class="start-stage">
+    <canvas id="heroCv" width="640" height="520" role="img"
+      aria-label="Animasi dua susunan dasar pasangan elektron di sekitar atom pusat: trigonal planar dan tetrahedral"></canvas>
+    <div class="hero-tag"><b id="heroName">Tetrahedral</b> · <span id="heroSub">4 domain elektron · 109,5°</span></div>
+  </div>
+
+  <div class="start-goals">
+    <div class="goal"><h3>Capaian Pembelajaran</h3>
+      <p>Peserta didik mampu menggunakan teori tolakan pasangan elektron kulit valensi (VSEPR) untuk menjelaskan bagaimana tolakan antardomain elektron menentukan susunan ruang dan bentuk molekul sederhana.</p></div>
+    <div class="goal"><h3>Tujuan Pembelajaran</h3>
+      <p>Setelah menggunakan media ini, peserta didik mampu <b>menjelaskan</b> pengaruh <span class="term" tabindex="0" role="button" aria-label="PEI: pasangan elektron ikatan"><b>PEI</b><span class="pop"><b>PEI (Pasangan Elektron Ikatan)</b>: pasangan elektron yang digunakan bersama oleh dua atom untuk membentuk ikatan. Dalam VSEPR, satu arah ikatan dihitung sebagai satu domain.</span></span> dan <span class="term" tabindex="0" role="button" aria-label="PEB: pasangan elektron bebas"><b>PEB</b><span class="pop"><b>PEB (Pasangan Elektron Bebas)</b>: pasangan elektron pada atom pusat yang tidak digunakan untuk berikatan. PEB tetap dihitung sebagai domain elektron dan memengaruhi bentuk molekul.</span></span> terhadap bentuk molekul NH₃ dan SO₃ berdasarkan teori VSEPR.</p>
+      <h4>Indikator pencapaian</h4>
+      <ol><li>Menentukan jumlah PEI dan PEB pada atom pusat NH₃ dan SO₃.</li>
+      <li>Menentukan bentuk molekul NH₃ dan SO₃ dari susunan domain elektronnya.</li>
+      <li>Menunjukkan pengaruh PEB terhadap sudut ikatan NH₃.</li></ol>
+      <p style="margin-top:8px;font-size:12.5px">Ketuk istilah bergaris titik untuk melihat artinya.</p></div>
+  </div>
+
+  <div class="start-foot">
+    <span>Teori VSEPR · NH₃ dan SO₃</span>
+    <span>Media pembelajaran interaktif</span>
+  </div>
+</div>
+
+<!-- ===================== APLIKASI ===================== -->
+<div id="app" hidden>
+
+  <aside class="side" id="side">
+    <div class="side-top">
+      <div class="brand">Virtual <span>Geometri Simulation</span><small>Teori VSEPR</small></div>
+      <button class="icon-btn" id="sideToggle" aria-label="Buka atau tutup daftar misi">≡</button>
+    </div>
+
+    <div class="side-body" id="sideBody">
+      <div class="prog">
+        <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+        <div class="prog-txt"><span id="progMol">0 dari 2 molekul</span><span id="progPct">0%</span></div>
+      </div>
+
+      <nav class="steps" id="stepNav">
+        <button class="step-btn" data-go="1"><span class="no">1</span>Dugaan awal</button>
+        <button class="step-btn" data-go="2"><span class="no">2</span>Pasangan elektron menolak</button>
+        <button class="step-btn" data-go="3"><span class="no">3</span>Hitung PEI &amp; PEB</button>
+        <button class="step-btn" data-go="4"><span class="no">4</span>Tentukan bentuk</button>
+        <button class="step-btn" data-go="5"><span class="no">5</span>Jawab masalahmu</button>
+      </nav>
+
+      <details class="kamus">
+        <summary>Kamus istilah</summary>
+        <dl>
+          <dt>EV</dt><dd>Elektron valensi: elektron di kulit terluar atom.</dd>
+          <dt>PEI</dt><dd>Pasangan elektron ikatan: dipakai bersama dua atom.</dd>
+          <dt>PEB</dt><dd>Pasangan elektron bebas: milik satu atom, tidak dipakai bersama.</dd>
+          <dt>Domain</dt><dd>PEI + PEB di sekitar atom pusat.</dd>
+          <dt>VSEPR</dt><dd>Teori tolakan pasangan elektron kulit valensi.</dd>
+        </dl>
+      </details>
+
+      <div class="side-note">
+        Misi terbuka satu per satu.
+        <div style="margin-top:10px"><button class="btn sm" id="btnHome">Layar awal</button></div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <span class="where" id="crumb">MISI 1</span>
+      <div class="tools">
+        <div class="audio-tools" role="group" aria-label="Audio pembelajaran">
+          <button class="btn sm" id="btnAudioPlay" type="button" title="Pemandu suara untuk halaman ini">▶ Dengarkan</button>
+          <button class="btn sm" id="btnAudioStop" type="button" title="Hentikan pemandu suara" disabled>■ Berhenti</button>
+          <button class="btn sm on" id="btnSfx" type="button" aria-pressed="true" title="Bunyi kecil saat berinteraksi">♪ Efek</button>
+          <label class="vol" title="Volume suara">🔊<input type="range" id="audVol" min="0" max="100" value="80" aria-label="Volume suara"></label>
+          <span class="audio-status" id="audioStatus" aria-live="polite">Audio tersedia</span>
+        </div>
+        <div class="molpick" id="molPick" hidden>
+          <span class="lbl">Molekul</span>
+        </div>
+        <div class="tsz" role="group" aria-label="Ukuran teks">
+          <span class="lbl">Teks</span>
+          <button id="tMin" title="Perkecil teks" aria-label="Perkecil teks">A−</button>
+          <button id="tPlus" title="Perbesar teks" aria-label="Perbesar teks">A+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- MISI 1 · DUGAAN ---------- -->
+    <section class="view" id="v1">
+      <div class="tag">MISI 1 · MEMPREDIKSI</div>
+      <h2>Sama-sama mengikat 3 atom. Apakah bentuknya pasti sama?</h2>
+      <div class="todo"><b>Tugasmu:</b> lihat kedua molekul, lalu pilih dugaanmu.</div>
+
+      <div class="idrow">
+        <label>Nama <input id="inNama" type="text" maxlength="40" autocomplete="name" placeholder="Nama kamu"></label>
+        <label>Kelas <input id="inKelas" type="text" maxlength="20" placeholder="Contoh: X-2"></label>
+      </div>
+
+      <div class="duel">
+        <div class="mcard">
+          <svg viewBox="0 0 200 150" aria-hidden="true">
+            <g stroke="#8FB2E8" stroke-width="2" stroke-dasharray="4 5">
+              <line x1="100" y1="42" x2="48" y2="110"/><line x1="100" y1="42" x2="100" y2="122"/><line x1="100" y1="42" x2="152" y2="110"/>
+            </g>
+            <circle cx="48" cy="112" r="14" fill="#1466D8"/><text x="48" y="112" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#fff" font-family="Space Grotesk,sans-serif">H</text>
+            <circle cx="100" cy="124" r="14" fill="#1466D8"/><text x="100" y="124" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#fff" font-family="Space Grotesk,sans-serif">H</text>
+            <circle cx="152" cy="112" r="14" fill="#1466D8"/><text x="152" y="112" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#fff" font-family="Space Grotesk,sans-serif">H</text>
+            <circle cx="100" cy="36" r="22" fill="#C25E00"/><text x="100" y="36" text-anchor="middle" dominant-baseline="central" font-size="19" font-weight="700" fill="#fff" font-family="Space Grotesk,sans-serif">N</text>
+          </svg>
+          <div class="f">NH₃</div>
+          <div class="s">3 atom H terikat pada N</div>
+          <span class="qm">bentuk = ?</span>
+        </div>
+        <div class="vs">VS</div>
+        <div class="mcard">
+          <svg viewBox="0 0 200 150" aria-hidden="true">
+            <g stroke="#8FB2E8" stroke-width="2" stroke-dasharray="4 5">
+              <line x1="100" y1="42" x2="48" y2="110"/><line x1="100" y1="42" x2="100" y2="122"/><line x1="100" y1="42" x2="152" y2="110"/>
+            </g>
+            <circle cx="48" cy="112" r="14" fill="#1466D8"/><text x="48" y="112" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#fff" font-family="Space Grotesk,sans-serif">O</text>
+            <circle cx="100" cy="124" r="14" fill="#1466D8"/><text x="100" y="124" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#fff" font-family="Space Grotesk,sans-serif">O</text>
+            <circle cx="152" cy="112" r="14" fill="#1466D8"/><text x="152" y="112" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#fff" font-family="Space Grotesk,sans-serif">O</text>
+            <circle cx="100" cy="36" r="22" fill="#C25E00"/><text x="100" y="36" text-anchor="middle" dominant-baseline="central" font-size="19" font-weight="700" fill="#fff" font-family="Space Grotesk,sans-serif">S</text>
+          </svg>
+          <div class="f">SO₃</div>
+          <div class="s">3 atom O terikat pada S</div>
+          <span class="qm">bentuk = ?</span>
+        </div>
+      </div>
+
+      <div class="ask" id="ask1"></div>
+
+      <details class="howto">
+        <summary>Cara memakai media</summary>
+        <div class="howgrid">
+          <span><b>Seret</b> gambar 3D untuk memutarnya</span>
+          <span><b>Acak ulang</b> mengacak posisi pasangan elektron</span>
+          <span><b>Seret atom</b> dari palet untuk merakit molekul</span>
+          <span><b>Ukur sudut</b> lalu klik dua atom untuk melihat sudutnya</span>
+          <span><b>Salah dua kali?</b> satu pilihan yang salah disisihkan</span>
+          <span><b>A− / A+</b> di atas mengubah ukuran teks</span>
+        </div>
+        <p><b>Dengarkan</b> memutar pemandu suara: bagian yang dibicarakan menyala dan tulisannya muncul di bawah layar. Setelah itu pemandu ikut berkomentar saat kamu beraksi. <b>Berhenti</b> mematikannya, <b>Efek</b> mengatur bunyi kecil saat kamu berinteraksi.</p>
+      </details>
+
+      <div class="nav-foot">
+        <button class="btn solid" id="next1" disabled>Pilih dugaanmu dulu</button>
+      </div>
+    </section>
+
+    <!-- ---------- MISI 2 · TOLAKAN ---------- -->
+    <section class="view" id="v2" hidden>
+      <div class="tag">MISI 2 · MENGAMATI &amp; MENGEKSPLORASI</div>
+      <h2>Mengapa pasangan elektron menempati posisi tertentu?</h2>
+      <div class="tpline"><b>Kenali istilah ini dulu</b></div>
+      <div class="chips-row terms">
+        <span><span class="term" tabindex="0" role="button"><b>EV</b><span class="pop"><b>EV (Elektron Valensi)</b>: elektron pada kulit terluar atom. Elektron inilah yang berperan dalam pembentukan ikatan.</span></span> elektron di kulit terluar</span>
+        <span><span class="term" tabindex="0" role="button"><b style="color:var(--teal)">PEI</b><span class="pop"><b>PEI (Pasangan Elektron Ikatan)</b>: pasangan elektron yang digunakan bersama oleh dua atom untuk membentuk ikatan. Satu arah ikatan dihitung sebagai satu domain.</span></span> pasangan elektron dipakai bersama 2 atom</span>
+        <span><span class="term" tabindex="0" role="button"><b style="color:var(--violet)">PEB</b><span class="pop"><b>PEB (Pasangan Elektron Bebas)</b>: pasangan elektron pada atom pusat yang tidak digunakan untuk berikatan. PEB tetap menjadi domain dan memberikan tolakan.</span></span> pasangan elektron milik 1 atom</span>
+        <span><span class="term" tabindex="0" role="button"><b>Domain</b><span class="pop"><b>Domain elektron</b>: daerah di sekitar atom pusat yang ditempati pasangan elektron ikatan atau pasangan elektron bebas. Jumlah domain = PEI + PEB.</span></span> = PEI + PEB</span>
+      </div>
+      <div class="todo" style="margin-top:14px"><b>Coba:</b> pilih jumlah pasangan elektron, tekan <b>Acak ulang</b>, dan amati sudut terkecilnya. Amati minimal 3 jumlah berbeda (muncul ✓).</div>
+
+      <div class="grid2">
+        <div class="stage">
+          <canvas id="simCv" width="620" height="440" role="img" aria-label="Simulasi tolakan pasangan elektron"></canvas>
+          <div class="stage-hint">Seret untuk memutar</div>
+          <div class="stage-bar">
+            <button class="btn sm" id="btnScatter">Acak ulang</button>
+            <button class="btn sm on" id="btnSpin1" aria-pressed="true">Putar otomatis</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel">
+            <h3 style="font-size:15px;margin-bottom:10px">Jumlah pasangan elektron</h3>
+            <div class="chipset" id="simChips"></div>
+            <div class="readout" style="margin-top:14px">
+              <dl>
+                <dt>Keadaan</dt><dd class="mono" id="simStatus">menyebar…</dd>
+                <dt>Sudut terkecil</dt><dd class="key" id="simAngle">—</dd>
+                <dt>Susunan</dt><dd id="simName">—</dd>
+                <dt>Sudah diamati</dt><dd class="mono" id="simSeen">belum ada</dd>
+              </dl>
+            </div>
+            <div class="legend">
+              <span><i style="background:var(--gold)"></i>atom pusat</span>
+              <span><i style="background:var(--teal)"></i>pasangan elektron</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="askwrap"><div class="ask" id="ask2"></div><div class="lockov" id="lock2">Amati dulu minimal 3 jumlah pasangan elektron pada simulasi di atas.</div></div>
+
+      <div class="panel section-gap" id="t2reveal" hidden style="border-color:var(--good)">
+        <h3>Kesimpulanmu: teori VSEPR</h3>
+        <p>Pasangan elektron di
+          <span class="term">kulit valensi<span class="pop"><b>Kulit valensi</b>: kulit elektron terluar atom. Hanya elektron di kulit ini yang ikut berikatan.</span></span>
+          atom pusat saling menolak, lalu menempati posisi paling berjauhan. Susunan itu menentukan bentuk molekul. Pasangan elektron bebas (PEB) menolak sedikit lebih kuat daripada pasangan elektron ikatan (PEI), dan ikatan rangkap tetap dihitung sebagai satu domain.</p>
+      </div>
+
+      <div class="nav-foot">
+        <button class="btn" data-go="1">← Misi 1</button>
+        <button class="btn solid" id="next2" disabled>Amati simulasi dan selesaikan cek dulu</button>
+      </div>
+    </section>
+
+    <!-- ---------- MISI 3 · HITUNG (TP 1) ---------- -->
+    <section class="view" id="v3" hidden>
+      <div class="tag">MISI 3 · MENGANALISIS <span class="tp">INDIKATOR 1</span></div>
+      <h2>Berapa PEI dan PEB pada <span class="mol" id="m3mol"></span>?</h2>
+      <div class="todo"><b>Tugasmu:</b> rakit molekul dari <b>palet atom</b>: seret atom pusat ke area rakit, seret atom lain ke dekatnya sampai berikatan, lalu pasangkan elektron yang tersisa. Hasil rakitanmu adalah <span class="term" tabindex="0" role="button">struktur Lewis<span class="pop"><b>Struktur Lewis</b>: gambar yang memperlihatkan elektron valensi, pasangan elektron ikatan (PEI), dan pasangan elektron bebas (PEB) pada suatu molekul.</span></span>, dan darinya kamu membaca <span class="term" tabindex="0" role="button">notasi VSEPR<span class="pop"><b>Notasi VSEPR</b>: cara singkat menulis susunan domain di sekitar atom pusat. A = atom pusat, X = PEI, E = PEB. Contoh AX₃E berarti 3 PEI dan 1 PEB.</span></span>.</div>
+      <p class="lede" id="m3info"></p>
+      <div class="note" id="m3note" hidden></div>
+
+      <div class="blk">
+        <div class="bh"><span class="bn">A</span>Elektron valensi</div>
+        <div class="grid2" id="atomCards"></div>
+      </div>
+
+      <div class="blk" id="blkB" hidden>
+        <div class="bh"><span class="bn">B</span>Bengkel molekul</div>
+        <div class="lwsteps" id="lwSteps"><span data-s="1">1 Atom pusat</span><span data-s="2">2 Ikatan (PEI)</span><span data-s="3">3 Sisa elektron (PEB)</span><span data-s="4">4 Hasil</span></div>
+        <div class="grid2">
+          <div>
+            <div class="lewis-wrap">
+              <svg id="lewisSvg" viewBox="0 0 460 440" role="img" aria-label="Area merakit molekul dengan palet atom"></svg>
+            </div>
+            <div class="stage-bar" style="border:1px solid var(--line);border-top:0;border-radius:0 0 var(--r) var(--r)">
+              <button class="btn sm" id="btnBondAll">Bantu: rakit otomatis</button>
+              <button class="btn sm" id="btnBondReset">Ulangi</button>
+            </div>
+          </div>
+          <div>
+            <div class="narration" id="lewisNarr"></div>
+            <div class="panel" style="margin-top:12px">
+              <h3 style="font-size:14.5px">Elektron valensi atom pusat</h3>
+              <div class="evbar" id="evBar" aria-hidden="true"></div>
+              <div class="evcap" id="evCap"></div>
+              <div class="readout" style="margin-top:10px">
+                <dl>
+                  <dt>PEI</dt><dd class="key" id="lwPei">0</dd>
+                  <dt>PEB</dt><dd class="key" id="lwPeb">0</dd>
+                  <dt>Domain (PEI + PEB)</dt><dd class="mono" id="lwDom">0</dd>
+                </dl>
+              </div>
+              <div class="legend">
+                <span><i style="background:#F2B134"></i>elektron atom pusat</span>
+                <span><i style="background:#29A8E8"></i>elektron atom terikat</span>
+                <span><i style="background:#9B5CF0"></i>PEB</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="blk" id="blkC" hidden>
+        <div class="bh"><span class="bn">C</span>Hasil rakitanmu</div>
+        <div class="panel resbox" id="resC" hidden></div>
+      </div>
+
+      <div class="nav-foot">
+        <button class="btn" data-go="2">← Misi 2</button>
+        <button class="btn solid" id="next3" disabled>Selesaikan hitungan dulu</button>
+      </div>
+    </section>
+
+    <!-- ---------- MISI 4 · BENTUK (TP 2) ---------- -->
+    <section class="view" id="v4" hidden>
+      <div class="tag">MISI 4 · MENGEKSPLORASI &amp; MENGUJI PREDIKSI <span class="tp">INDIKATOR 2 &amp; 3</span></div>
+      <h2>Bentuk apa yang terbentuk pada <span class="mol" id="m4mol"></span>?</h2>
+
+      <div class="tpline">Bedakan dua istilah ini: <span class="term" tabindex="0" role="button">susunan domain<span class="pop"><b>Susunan domain</b>: posisi semua domain di sekitar atom pusat (PEI + PEB). Contoh: 4 domain tersusun tetrahedral.</span></span> dan <span class="term" tabindex="0" role="button">bentuk molekul<span class="pop"><b>Bentuk molekul</b>: susunan atom-atomnya saja. PEB ikut menentukan bentuk, tetapi tidak terlihat sebagai atom.</span></span>.</div>
+      <div class="panel lockpanel" id="lock4" hidden>
+        <p id="lock4txt"></p>
+        <button class="btn solid" data-go="3">Ke Misi 3</button>
+      </div>
+
+      <div id="body4">
+        <div class="todo"><b>Tugasmu:</b> ramalkan bentuknya, lalu di model 3D: putar, ukur satu sudut, sembunyikan PEB, dan (untuk NH₃) geser kekuatan tolakan PEB.</div>
+        <div class="ask" id="askD"></div>
+
+        <div id="viewerWrap" hidden>
+          <div class="grid2 section-gap" style="align-items:start">
+            <div class="stage">
+              <canvas id="molCv" width="620" height="470" role="img" aria-label="Model tiga dimensi molekul"></canvas>
+              <div class="stage-hint" id="molHint">Seret untuk memutar</div>
+              <div class="stage-bar">
+                <button class="btn sm on" id="btnSpin5" aria-pressed="true">Putar otomatis</button>
+                <button class="btn sm" id="btnReset5">Posisi awal</button>
+                <button class="btn sm" id="btnMeasure" aria-pressed="false">Ukur sudut</button>
+                <button class="btn sm on" id="btnLp" aria-pressed="true" title="Tampilkan atau sembunyikan PEB">PEB</button>
+              </div>
+              <div class="stage-bar" style="border-top:0;padding-top:0" role="group" aria-label="Tampilan model">
+                <button class="btn sm" id="mode_domain" aria-pressed="false">Domain elektron</button>
+                <button class="btn sm" id="mode_ball" aria-pressed="false">Bola-tongkat</button>
+                <button class="btn sm on" id="mode_both" aria-pressed="true">Gabungan</button>
+                <button class="btn sm" id="btnZoomIn" title="Perbesar model">Perbesar +</button>
+                <button class="btn sm" id="btnZoomOut" title="Perkecil model">Perkecil −</button>
+                <button class="btn sm" id="btnAxes" aria-pressed="false">Sumbu x, y, z</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="panel readout">
+                <dl>
+                  <dt>Notasi VSEPR</dt><dd class="key" id="r5not">—</dd>
+                  <dt>Susunan domain</dt><dd id="r5dom">—</dd>
+                  <dt>Bentuk molekul</dt><dd id="r5bentuk">—</dd>
+                  <dt>Sudut menurut teori</dt><dd class="mono" id="r5sudut">—</dd>
+                  <dt>Sudut yang kamu ukur</dt><dd class="mono" id="r5ukur">belum diukur</dd>
+                </dl>
+                <div class="legend">
+                  <span><i class="lgdot" id="lgCtr" style="background:var(--gold)"></i>atom pusat</span>
+                  <span><i class="lgdot" id="lgLig" style="background:var(--teal)"></i>atom terikat (PEI)</span>
+                  <span><i style="background:#3D8BF2"></i>lobus PEI</span>
+                  <span><i style="background:var(--violet)"></i>lobus PEB</span>
+                </div>
+              </div>
+              <div class="panel lpctl" id="lpCtl" hidden style="margin-top:12px">
+                <h3 style="font-size:14.5px;margin-bottom:4px">Uji pengaruh PEB pada sudut</h3>
+                <input type="range" id="lpRange" min="100" max="150" step="1" value="100" aria-label="Kekuatan tolakan PEB dibandingkan PEI">
+                <div class="lprow"><span>sama kuat dengan PEI</span><span>lebih kuat</span></div>
+                <div class="readout" style="margin-top:8px"><dl><dt>Sudut H–N–H model</dt><dd class="key" id="lpAngle">—</dd><dt>Tetrahedral ideal</dt><dd class="mono">109,5°</dd></dl></div>
+                <p class="evcap" id="lpNote" style="margin-top:8px"></p>
+              </div>
+              <div class="panel" id="repPanel" style="margin-top:12px">
+                <h3 style="font-size:14.5px;margin-bottom:2px">Urutan kekuatan tolakan</h3>
+                <div class="repbars" aria-label="PEB–PEB lebih besar dari PEB–PEI lebih besar dari PEI–PEI">
+                  <div class="rb"><span>PEB – PEB</span><span class="bar" style="width:100%;background:linear-gradient(90deg,#9B5CF0,#7A35D9)"></span></div>
+                  <div class="rb"><span>PEB – PEI</span><span class="bar" style="width:72%;background:linear-gradient(90deg,#9B5CF0,#3D8BF2)"></span></div>
+                  <div class="rb"><span>PEI – PEI</span><span class="bar" style="width:46%;background:linear-gradient(90deg,#3D8BF2,#2F6FD0)"></span></div>
+                </div>
+                <p class="evcap" id="repWhy"></p>
+                <p class="evcap" style="margin-top:6px"><b>Catatan:</b> ini penyederhanaan untuk memahami VSEPR. Elektron sebenarnya berupa awan peluang, bukan bola yang diam.</p>
+              </div>
+              <div class="chip-real why"><b>ALASAN</b><span id="molWhy"></span></div>
+              <div class="chip-real"><b>REALITA</b><span id="macroTxt"></span></div>
+            </div>
+          </div>
+
+          <div class="fb ok" id="concE" hidden style="margin-top:14px"></div>
+
+          <div style="margin-top:16px">
+            <button class="btn solid" id="btnDone5" disabled>Tandai molekul ini selesai</button>
+            <span id="doneMsg" style="font-size:13px;color:var(--good);margin-left:10px"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-foot">
+        <button class="btn" data-go="3">← Misi 3</button>
+        <button class="btn solid" id="next4" disabled>Tandai kedua molekul selesai</button>
+      </div>
+    </section>
+
+    <!-- ---------- MISI 5 · JAWAB ---------- -->
+    <section class="view" id="v5" hidden>
+      <div class="tag">MISI 5 · MENYIMPULKAN <span class="tp">TUJUAN</span></div>
+      <h2>Jadi, mengapa NH₃ dan SO₃ berbeda bentuk?</h2>
+      <div class="todo"><b>Tugasmu:</b> cocokkan dugaanmu, terapkan alur yang sama pada CH₄ dan H₂O, temukan pola sudutnya, tulis penjelasanmu, lalu susun alur berpikirnya.</div>
+
+      <div class="printhead" id="printHead" hidden></div>
+      <div class="hypcheck" id="hypCheck"></div>
+
+      <div class="tblwrap">
+        <table>
+          <thead><tr>
+            <th>Molekul</th><th>PEI</th><th>PEB</th><th>Domain</th><th>Notasi</th><th>Bentuk molekul</th><th>Sudut</th>
+          </tr></thead>
+          <tbody id="sumBody"></tbody>
+        </table>
+      </div>
+
+      <div class="ask section-gap" id="applyBox">
+        <div class="qh">TERAPKAN PADA MOLEKUL LAIN</div>
+        <p class="q">Kamu sudah menemukan alurnya. Pakai alur yang sama pada dua molekul baru: tentukan PEI dan PEB, lalu lihat bentuknya.</p>
+        <div class="molpick" id="apPick" style="margin:0 0 10px"></div>
+        <div class="grid2" style="align-items:start">
+          <div class="stage">
+            <canvas id="apCv" width="520" height="400" role="img" aria-label="Model tiga dimensi molekul uji"></canvas>
+            <div class="stage-hint" id="apHint">Tentukan PEI dan PEB dulu</div>
+            <div class="stage-bar">
+              <button class="btn sm" id="apm_domain" aria-pressed="false">Domain elektron</button>
+              <button class="btn sm" id="apm_ball" aria-pressed="false">Bola-tongkat</button>
+              <button class="btn sm on" id="apm_both" aria-pressed="true">Gabungan</button>
+            </div>
+          </div>
+          <div>
+            <p class="evcap" id="apInfo" style="margin-top:0"></p>
+            <div class="stepper"><span class="lab">PEI</span><button class="btn sm" id="apPeiM" aria-label="Kurangi PEI">−</button><b class="v" id="apPei">0</b><button class="btn sm" id="apPeiP" aria-label="Tambah PEI">+</button></div>
+            <div class="stepper"><span class="lab">PEB</span><button class="btn sm" id="apPebM" aria-label="Kurangi PEB">−</button><b class="v" id="apPeb">0</b><button class="btn sm" id="apPebP" aria-label="Tambah PEB">+</button></div>
+            <button class="btn" id="btnApCheck" style="margin-top:6px">Periksa dan tampilkan bentuk</button>
+            <div class="fb" id="apFb" hidden style="margin-top:10px"></div>
+            <div class="readout" id="apRes" hidden style="margin-top:10px"><dl>
+              <dt>Domain</dt><dd class="key" id="apDom">—</dd>
+              <dt>Notasi</dt><dd class="key" id="apNot">—</dd>
+              <dt>Susunan domain</dt><dd id="apSus">—</dd>
+              <dt>Bentuk molekul</dt><dd class="key" id="apBen">—</dd>
+              <dt>Sudut ikatan</dt><dd class="key" id="apSud">—</dd>
+            </dl></div>
+          </div>
+        </div>
+        <div id="apPattern" hidden style="margin-top:14px">
+          <div class="qh">TEMUKAN POLANYA</div>
+          <div class="patbars" id="patBars"></div>
+          <p class="q" style="margin-top:6px">Semakin banyak PEB pada atom pusat (0, 1, lalu 2), sudut ikatannya menjadi…</p>
+          <div class="opts" id="patOpts"></div>
+          <div class="fb" id="patFb" hidden></div>
+        </div>
+      </div>
+
+      <div class="ask section-gap" id="tulisBox">
+        <div class="qh">TULIS PENJELASANMU</div>
+        <p class="q">Dengan kata-katamu sendiri: mengapa bentuk NH₃ dan SO₃ berbeda padahal sama-sama mengikat 3 atom, dan apa pengaruh PEB pada bentuk serta sudut ikatan NH₃?</p>
+        <textarea id="tulisIn" rows="4" maxlength="600" placeholder="Tulis penjelasanmu di sini (3-4 kalimat)…"></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn sm solid" id="btnTulis">Periksa kata kunci</button>
+          <button class="btn sm" id="btnContoh" hidden>Lihat jawaban contoh</button>
+        </div>
+        <div class="kw" id="kwBox" hidden></div>
+        <div class="fb" id="contohBox" hidden></div>
+      </div>
+
+      <div class="ask section-gap">
+        <div class="qh">SUSUN ALUR BERPIKIRMU</div>
+        <p class="q">Urutkan langkah menentukan bentuk molekul. Klik mulai dari langkah pertama.</p>
+        <div class="alur" id="alurBox"></div>
+        <div class="fb" id="alurFb" hidden></div>
+        <button class="btn sm" id="btnAlurReset" style="margin-top:12px">Ulangi</button>
+      </div>
+
+      <div class="panel section-gap" id="capaiBox">
+        <h3 style="font-size:15px;margin-bottom:2px">Capaian belajarmu</h3>
+        <p class="evcap" style="margin-top:0">Tanda ✓ muncul setelah kamu mengerjakannya sendiri di media ini.</p>
+        <div class="capai" id="capaiList"></div>
+      </div>
+
+      <div class="done-banner" id="doneBanner" hidden>
+        <b>Misi tuntas.</b> <span id="doneText"></span><br>
+        <span class="badge">Detektif Bentuk Molekul</span>
+        <div style="margin-top:12px"><button class="btn sm" id="btnPrint">Simpan lembar hasil belajar (PDF)</button><p class="evcap" style="margin-top:6px">Jendela cetak akan terbuka. Pilih tujuan <b>Simpan sebagai PDF</b>, lalu kumpulkan ke gurumu.</p></div>
+      </div>
+
+      <div class="panel reading section-gap">
+        <h3>Bacaan lanjutan</h3>
+        <p>Ingin mencoba molekul lain? Buka simulasi <a href="https://phet.colorado.edu/en/simulations/molecule-shapes" target="_blank" rel="noopener">PhET Molecule Shapes</a> (butuh internet), lalu bandingkan hasilnya dengan yang kamu temukan di sini.</p>
+        <h3 style="margin-top:18px">Daftar pustaka</h3>
+        <p class="ref">Brown, T. L., LeMay, H. E., Jr., Bursten, B. E., Murphy, C. J., &amp; Woodward, P. M. (2012). <i>Chemistry: The central science</i> (12th ed.). Pearson Prentice Hall. ISBN 978-0-321-69672-4.</p>
+        <p class="ref">PhET Interactive Simulations. (n.d.). <i>Molecule shapes</i> [Simulasi interaktif]. University of Colorado Boulder. https://phet.colorado.edu/en/simulations/molecule-shapes</p>
+        <p class="ref">Badan Standar, Kurikulum, dan Asesmen Pendidikan. (2024). <i>Capaian pembelajaran mata pelajaran Kimia</i> (Keputusan Kepala BSKAP Nomor 032/H/KR/2024). Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi.</p>
+        <p style="font-size:12.5px;margin-top:10px">Sudut ikatan pada media ini (NH₃ 107°, SO₃ 120°) adalah nilai teoretis VSEPR sesuai buku teks di atas, yaitu bab tentang geometri molekul dan teori ikatan.</p>
+      </div>
+
+      <div class="nav-foot">
+        <button class="btn" data-go="4">← Misi 4</button>
+        <button class="btn" data-go="1">Kembali ke Misi 1</button>
+      </div>
+
+      <p class="foot-note">Sudut pada Misi 4 dihitung dari koordinat model (NH₃ 107°, SO₃ 120° menurut teori VSEPR), jadi nilainya sudut ideal. Pengukuran laboratorium bisa sedikit berbeda.</p>
+    </section>
+
+  </main>
+</div>
+
+<div class="caption" id="caption" role="status" aria-live="polite" hidden></div>
+<div id="printSheet" class="psheet" aria-hidden="true"></div>
+<script>
+(function(){
+"use strict";
+
+var S3 = Math.sqrt(3);
+
+var GEOM = {
+  2:[[0,0,1],[0,0,-1]],
+  3:[[0,0,1],[S3/2,0,-0.5],[-S3/2,0,-0.5]],
+  4:[[0,0,1],[0.942809,0,-0.333333],[-0.471405,0.816497,-0.333333],[-0.471405,-0.816497,-0.333333]],
+  5:[[0,1,0],[0,-1,0],[0,0,1],[S3/2,0,-0.5],[-S3/2,0,-0.5]],
+  6:[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]]
+};
+var GNAME  = {2:"Linear",3:"Trigonal planar",4:"Tetrahedral",5:"Bipiramida trigonal",6:"Oktahedral"};
+var GANGLE = {2:"180°",3:"120°",4:"109,5°",5:"90° dan 120°",6:"90°"};
+
+function nh3Vecs(){ var c=Math.cos(107*Math.PI/180), s2=(1-c)/1.5, sr=Math.sqrt(s2), h=-Math.sqrt(1-s2), o=[], i;
+  for(i=0;i<3;i++){ var a=i*2*Math.PI/3; o.push([sr*Math.cos(a),h,sr*Math.sin(a)]); } return o; }
+var ATOM = {
+  N :{nama:"Nitrogen", z:7,  konf:"1s² 2s² 2p³",              kulit:[2,5],   ev:5, gol:"VA",   per:2},
+  O :{nama:"Oksigen",  z:8,  konf:"1s² 2s² 2p⁴",              kulit:[2,6],   ev:6, gol:"VIA",  per:2},
+  H :{nama:"Hidrogen", z:1,  konf:"1s¹",                      kulit:[1],     ev:1, gol:"IA",   per:1},
+  Be:{nama:"Berilium", z:4,  konf:"1s² 2s²",                  kulit:[2,2],   ev:2, gol:"IIA",  per:2},
+  B :{nama:"Boron",    z:5,  konf:"1s² 2s² 2p¹",              kulit:[2,3],   ev:3, gol:"IIIA", per:2},
+  C :{nama:"Karbon",   z:6,  konf:"1s² 2s² 2p²",              kulit:[2,4],   ev:4, gol:"IVA",  per:2},
+  F :{nama:"Fluorin",  z:9,  konf:"1s² 2s² 2p⁵",              kulit:[2,7],   ev:7, gol:"VIIA", per:2},
+  P :{nama:"Fosforus", z:15, konf:"1s² 2s² 2p⁶ 3s² 3p³",      kulit:[2,8,5], ev:5, gol:"VA",   per:3},
+  S :{nama:"Belerang", z:16, konf:"1s² 2s² 2p⁶ 3s² 3p⁴",      kulit:[2,8,6], ev:6, gol:"VIA",  per:3},
+  Cl:{nama:"Klorin",   z:17, konf:"1s² 2s² 2p⁶ 3s² 3p⁵",      kulit:[2,8,7], ev:7, gol:"VIIA", per:3}
+};
+
+var MOL = [
+{ id:"NH3", rumus:"NH₃", nama:"Amonia", pusat:"N", ligan:"H", n:3, order:1, peb:1,
+  notasi:"AX₃E", sudut:"107°", bentuk:"Piramida trigonal",
+  oktet:"N dikelilingi 8 elektron (3 ikatan + 1 pasangan bebas), jadi oktet terpenuhi. Tiap H dikelilingi 2 elektron (duplet).",
+  makro:"Gas berbau tajam, bahan pupuk dan pembersih rumah tangga.",
+  polar:"PEB menekan tiga ikatan N–H sehingga bentuknya tidak simetris. NH₃ bersifat <b>polar</b> dan mudah larut dalam air." },
+
+{ id:"SO3", rumus:"SO₃", nama:"Belerang trioksida", pusat:"S", ligan:"O", n:3, order:2, peb:0,
+  notasi:"AX₃", sudut:"120°", bentuk:"Trigonal planar",
+  catatan:"Struktur Lewis SO₃ bisa digambar dengan beberapa cara (struktur resonansi). Untuk VSEPR yang dihitung adalah <b>jumlah arah ikatan</b>: ikatan rangkap dua tetap satu domain, sehingga SO₃ punya 3 domain bagaimanapun cara menggambarnya.",
+  oktet:"Dalam salah satu struktur Lewis konvensional, SO₃ dapat digambarkan dengan tiga ikatan rangkap. Untuk VSEPR, setiap ikatan rangkap tetap dihitung sebagai satu domain elektron. Ikatan S–O sebenarnya memiliki karakter yang terdelokalisasi; penjelasannya tidak perlu menganggap orbital 3d sebagai tempat perluasan oktet.",
+  makro:"Perantara pembuatan asam sulfat, juga penyebab hujan asam.",
+  polar:"Tiga tarikan S=O saling meniadakan pada bidang datar. SO₃ bersifat <b>nonpolar</b>, walau tiap ikatan S=O polar." }
+];
+function molById(id){ for(var i=0;i<MOL.length;i++) if(MOL[i].id===id) return MOL[i]; return MOL[0]; }
+
+/* =========================================================
+   2 · KEADAAN
+   ========================================================= */
+var st = {
+  view:"1", unlocked:1, mol:"NH3", hyp:null, alur:false, alurN:0, finish:false, quizDone:false, quizScore:0,
+  done:{},                 /* molekul yang sudah tuntas tahap 5 */
+  ok:{},                   /* jawaban benar per molekul per tahap: "NH3-2" dst */
+  bonds:0, bondArr:[], lastBond:-1, drag:null, meas:{}, simSeen:{}, lpOn:true, lpMoved:{}, lpLow:{}, lpReal:{}, ap:{}, apIn:{}, apSel:"CH4", pola:false, ballSeen:{}, measVal:{}, lw:null,
+  pei:null, peb:null,
+  quiz:[], okt:{}
+};
+var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function M(){ return molById(st.mol); }
+function okKey(tahap){ return st.mol + "-" + tahap; }
+function isOk(tahap){ return !!st.ok[okKey(tahap)]; }
+function setOk(tahap){ st.ok[okKey(tahap)] = true; }
+function $(id){ return document.getElementById(id); }
+function el(sel,root){ return (root||document).querySelector(sel); }
+
+/* =========================================================
+   3 · WARNA & BANTUAN GAMBAR
+   ========================================================= */
+var PAL = {};
+function readPal(){
+  var cs = getComputedStyle(document.documentElement);
+  ["bg2","panel","line","text","text-dim","text-faint","gold","teal","violet","bond","good"]
+    .forEach(function(k){ PAL[k] = cs.getPropertyValue("--"+k).trim(); });
+}
+function hex2rgb(h){
+  h = h.replace("#","");
+  if(h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];
+}
+function shade(hex,p){
+  var c = hex2rgb(hex), i, o = "#";
+  for(i=0;i<3;i++){
+    var v = p>=0 ? c[i]+(255-c[i])*p : c[i]*(1+p);
+    v = Math.max(0,Math.min(255,Math.round(v)));
+    o += ("0"+v.toString(16)).slice(-2);
+  }
+  return o;
+}
+function rgba(hex,a){ var c=hex2rgb(hex); return "rgba("+c[0]+","+c[1]+","+c[2]+","+a+")"; }
+function norm(v){ var L=Math.hypot(v[0],v[1],v[2])||1; return [v[0]/L,v[1]/L,v[2]/L]; }
+function angleBetween(a,b){
+  var d=a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  return Math.acos(Math.max(-1,Math.min(1,d)))*180/Math.PI;
+}
+function slerp(a,b,t){
+  var d=Math.max(-1,Math.min(1,a[0]*b[0]+a[1]*b[1]+a[2]*b[2])), om=Math.acos(d);
+  if(om<1e-4) return a.slice();
+  var s=Math.sin(om), p=Math.sin((1-t)*om)/s, q=Math.sin(t*om)/s;
+  return [a[0]*p+b[0]*q, a[1]*p+b[1]*q, a[2]*p+b[2]*q];
+}
+function fmt(x){ return x.toFixed(1).replace(".",","); }
+
+/* =========================================================
+   4 · MESIN GAMBAR TIGA DIMENSI
+   ========================================================= */
+function Scene(cv,opt){
+  this.cv = cv; this.ctx = cv.getContext("2d"); this.opt = opt || {};
+  this.rx = -0.30; this.ry = 0.62; this.spin = !reduce;
+  this.vecs = []; this.lps = []; this.scales = []; this.sel = []; this.angle = null;
+  this.hits = []; this.drag = false; this.on = false;
+  this.W = 600; this.H = 440; this.dpr = 1;
+  this.measuring = false; this.zoom = 1;
+  var self = this;
+  window.addEventListener("resize", function(){ self.resize(); });
+  this.bindDrag();
+}
+Scene.prototype.resize = function(){
+  var box = this.cv.parentNode.getBoundingClientRect();
+  var cw = this.cv.clientWidth || box.width;
+  if(!cw) return;
+  var w = Math.max(260, Math.round(cw));
+  this.W = w;
+  this.H = Math.round(Math.min(Math.max(w*(this.opt.ratio||0.78),300), this.opt.maxH||470));
+  this.dpr = Math.min(window.devicePixelRatio||1, 2);
+  this.cv.width = this.W*this.dpr; this.cv.height = this.H*this.dpr;
+  this.cv.style.height = this.H+"px";
+  this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+  this.draw();
+};
+Scene.prototype.rot = function(v){
+  var cx=Math.cos(this.rx), sx=Math.sin(this.rx), cy=Math.cos(this.ry), sy=Math.sin(this.ry);
+  var x = v[0]*cy + v[2]*sy, z = -v[0]*sy + v[2]*cy;
+  var y = v[1]*cx - z*sx; z = v[1]*sx + z*cx;
+  return [x,y,z];
+};
+Scene.prototype.proj = function(p){
+  var CAM=4.6, sc=Math.min(this.W,this.H)*0.40*(this.zoom||1), z=CAM-p[2];
+  var s=(CAM*sc*0.76)/z;
+  return {x:this.W/2 + p[0]*s, y:this.H/2 - p[1]*s, s:s};
+};
+Scene.prototype.bindDrag = function(){
+  var self=this, cv=this.cv, last=null;
+  var pd=0, pz=1;
+  function td(e){ var a=e.touches[0], b=e.touches[1]; return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY); }
+  cv.addEventListener("wheel",function(e){
+    if(!e.ctrlKey) return;
+    e.preventDefault();
+    self.zoom=Math.max(0.6,Math.min(2.2,(self.zoom||1)*(e.deltaY<0?1.1:0.91))); self.draw();
+  },{passive:false});
+  function down(e){
+    if(e.touches && e.touches.length===2){ pd=td(e); pz=self.zoom||1; self.drag=false; last=null; return; }
+    if(self.measuring) return;
+    self.drag=true; cv.classList.add("grab");
+    var t=e.touches?e.touches[0]:e; last=[t.clientX,t.clientY];
+  }
+  function move(e){
+    if(e.touches && e.touches.length===2 && pd>0){
+      self.zoom=Math.max(0.6,Math.min(2.2,pz*td(e)/pd)); if(e.cancelable) e.preventDefault(); self.draw(); return;
+    }
+    if(!self.drag||!last) return;
+    var t=e.touches?e.touches[0]:e;
+    self.ry += (t.clientX-last[0])*0.0095;
+    self.rx += (t.clientY-last[1])*0.0095;
+    self.rx = Math.max(-1.45,Math.min(1.45,self.rx));
+    last=[t.clientX,t.clientY];
+    if(e.cancelable) e.preventDefault();
+    self.draw();
+  }
+  function up(){ pd=0; self.drag=false; last=null; cv.classList.remove("grab"); }
+  cv.addEventListener("mousedown",down); cv.addEventListener("touchstart",down,{passive:true});
+  window.addEventListener("mousemove",move); cv.addEventListener("touchmove",move,{passive:false});
+  window.addEventListener("mouseup",up);   window.addEventListener("touchend",up);
+};
+Scene.prototype.ball = function(p,rad,base,label,tc){
+  var ctx=this.ctx, r=Math.max(3,rad*p.s);
+  ctx.save(); ctx.fillStyle="rgba(10,35,66,0.14)"; ctx.beginPath();
+  ctx.ellipse(p.x+r*0.12,p.y+r*0.96,r*0.8,r*0.2,0,0,Math.PI*2); ctx.fill(); ctx.restore();
+  var g=ctx.createRadialGradient(p.x-r*0.35,p.y-r*0.4,r*0.08,p.x,p.y,r*1.05);
+  g.addColorStop(0,shade(base,0.6)); g.addColorStop(0.45,base); g.addColorStop(1,shade(base,-0.5));
+  ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+  ctx.lineWidth=1.1; ctx.strokeStyle=shade(base,-0.55); ctx.stroke();
+  ctx.save(); ctx.fillStyle="rgba(255,255,255,0.55)"; ctx.beginPath();
+  ctx.ellipse(p.x-r*0.34,p.y-r*0.42,r*0.24,r*0.14,-0.6,0,Math.PI*2); ctx.fill(); ctx.restore();
+  if(label){
+    var c=hex2rgb(base), lum=0.299*c[0]+0.587*c[1]+0.114*c[2];
+    ctx.fillStyle=tc||(lum<150?"#FFFFFF":"#08121A"); ctx.font="700 "+Math.round(r*0.78)+"px 'Space Grotesk',system-ui,sans-serif";
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(label,p.x,p.y+0.5);
+  }
+};
+Scene.prototype.pairDots = function(p,rad,base){
+  var ctx=this.ctx, r=Math.max(3,rad*p.s), d=r*0.34;
+  ctx.fillStyle=shade(base,-0.55);
+  ctx.beginPath(); ctx.arc(p.x-d,p.y,Math.max(1.4,r*0.15),0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x+d,p.y,Math.max(1.4,r*0.15),0,Math.PI*2); ctx.fill();
+};
+Scene.prototype.arc = function(){
+  if(this.sel.length!==2 || this.angle===null) return;
+  var ctx=this.ctx, a=this.rot(this.vecs[this.sel[0]]), b=this.rot(this.vecs[this.sel[1]]);
+  var pts=[], i, R=0.45;
+  for(i=0;i<=44;i++){ var v=slerp(a,b,i/44); pts.push(this.proj([v[0]*R,v[1]*R,v[2]*R])); }
+  ctx.save();
+  ctx.strokeStyle="#E8548F"; ctx.lineWidth=2.2; ctx.lineJoin="round";
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+  for(i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.stroke();
+  var c=this.proj([0,0,0]); ctx.setLineDash([4,4]); ctx.lineWidth=1.3;
+  [a,b].forEach(function(v){
+    var e=this.proj([v[0],v[1],v[2]]);
+    ctx.beginPath(); ctx.moveTo(c.x,c.y); ctx.lineTo(e.x,e.y); ctx.stroke();
+  },this);
+  ctx.setLineDash([]);
+  var m=pts[22], txt=fmt(this.angle)+"°";
+  ctx.font="600 14px 'IBM Plex Mono',monospace"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  var w=ctx.measureText(txt).width+15;
+  ctx.fillStyle="#E8548F"; ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(m.x-w/2,m.y-11,w,22,11); else ctx.rect(m.x-w/2,m.y-11,w,22);
+  ctx.fill(); ctx.fillStyle="#FFF"; ctx.fillText(txt,m.x,m.y);
+  ctx.restore();
+};
+Scene.prototype.lobe = function(C,p,o){
+  var ctx=this.ctx, dx=p.x-C.x, dy=p.y-C.y, L=Math.hypot(dx,dy)||1, ang=Math.atan2(dy,dx);
+  var minor=Math.max(8,o.minor), major=Math.max(L*o.len,minor*1.08), cx=C.x+dx*o.at, cy=C.y+dy*o.at;
+  var ratio=minor/major, al=o.alpha, col=o.col;
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(ang); ctx.scale(1,ratio);
+  var g=ctx.createRadialGradient(-major*0.28,-major*0.4,major*0.04,0,0,major);
+  g.addColorStop(0,rgba(shade(col,0.7),Math.min(1,al+0.25)));
+  g.addColorStop(0.55,rgba(col,al));
+  g.addColorStop(1,rgba(shade(col,-0.35),al*0.55));
+  ctx.beginPath(); ctx.arc(0,0,major,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+  ctx.lineWidth=1.3; ctx.strokeStyle=rgba(shade(col,-0.3),0.6); ctx.stroke();
+  ctx.fillStyle="rgba(255,255,255,0.5)"; ctx.beginPath();
+  ctx.ellipse(-major*0.34,-major*0.46,major*0.2,major*0.11,-0.35,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+  var ux=dx/L, uy=dy/L, px=-uy, py=ux, dr=Math.max(2.2,minor*0.13), k, sg;
+  for(k=0;k<2;k++){
+    sg=k?1:-1;
+    var ex=cx+ux*major*0.26*sg+px*minor*0.36, ey=cy+uy*major*0.26*sg+py*minor*0.36;
+    ctx.beginPath(); ctx.arc(ex,ey,dr,0,Math.PI*2); ctx.fillStyle="#F2B134"; ctx.fill();
+    ctx.lineWidth=1; ctx.strokeStyle="#fff"; ctx.stroke();
+  }
+  return {x:cx,y:cy,r:minor};
+};
+Scene.prototype.badge = function(x,y,n){
+  var ctx=this.ctx;
+  ctx.beginPath(); ctx.arc(x,y,10.5,0,Math.PI*2); ctx.fillStyle="#fff"; ctx.fill();
+  ctx.lineWidth=1.8; ctx.strokeStyle=PAL.teal; ctx.stroke();
+  ctx.fillStyle="#0B1F3A"; ctx.font="700 12px 'Space Grotesk',system-ui,sans-serif";
+  ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(String(n),x,y+0.5);
+};
+Scene.prototype.draw = function(){
+  var ctx=this.ctx, W=this.W, H=this.H, i, self=this;
+  var mode=this.opt.mode||"both", showL=(mode!=="ball"), showB=(mode!=="domain");
+  ctx.clearRect(0,0,W,H);
+  var bgGrad=ctx.createRadialGradient(W/2,H*0.36,10,W/2,H*0.5,Math.max(W,H)*0.72);
+  bgGrad.addColorStop(0,shade(PAL.bg2,0.05)); bgGrad.addColorStop(1,PAL.bg2);
+  ctx.fillStyle=bgGrad; ctx.fillRect(0,0,W,H);
+
+  var C=this.proj([0,0,0]);
+  ctx.save(); ctx.setLineDash([3,6]); ctx.strokeStyle=rgba(PAL.line,1); ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(W/2,H/2,C.s,0,Math.PI*2); ctx.stroke(); ctx.restore();
+
+  if(this.opt.axes){
+    [[1,0,0,"x","#E5484D"],[0,1,0,"y","#2FA84F"],[0,0,1,"z","#3D8BF2"]].forEach(function(a){
+      var e=self.proj(self.rot([a[0]*1.55,a[1]*1.55,a[2]*1.55]));
+      ctx.save(); ctx.beginPath(); ctx.moveTo(C.x,C.y); ctx.lineTo(e.x,e.y);
+      ctx.strokeStyle=a[4]; ctx.globalAlpha=0.7; ctx.lineWidth=1.6; ctx.stroke(); ctx.globalAlpha=1;
+      ctx.fillStyle=a[4]; ctx.font="700 12px 'IBM Plex Mono',monospace"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText(a[3],e.x+(e.x>=C.x?9:-9),e.y); ctx.restore();
+    });
+  }
+
+  var items=[]; this.hits=[];
+  var rC=Math.max(3,(this.opt.ctrR||0.38)*C.s);
+  for(i=0;i<this.vecs.length;i++){
+    var sc = this.scales[i]===undefined?1:this.scales[i];
+    if(sc<=0.02) continue;
+    var rv=this.rot(this.vecs[i]);
+    var p=this.proj(rv), mid=this.proj([rv[0]*0.6,rv[1]*0.6,rv[2]*0.6]);
+    if(mode==="domain") this.hits.push({i:i,x:mid.x,y:mid.y,r:Math.max(24,0.34*p.s)});
+    else this.hits.push({i:i,x:p.x,y:p.y,r:Math.max(24,0.34*p.s)});
+    var zb = rv[2]>0 ? rv[2]*0.5 : rv[2]-0.03;
+    if(showB) items.push({z:zb,k:"bond",p:p,i:i,sc:sc});
+    if(showL) items.push({z:zb+0.01,k:"lobe",p:p,i:i,sc:sc,dep:rv[2]});
+    if(showB) items.push({z:rv[2],k:"node",p:p,i:i,sc:sc});
+  }
+  if(showL){
+    for(i=0;i<this.lps.length;i++){
+      var lv=this.rot(this.lps[i]);
+      items.push({z:lv[2]*0.5+0.01,k:"lp",p:this.proj([lv[0]*0.85,lv[1]*0.85,lv[2]*0.85]),dep:lv[2]});
+    }
+  }
+  items.push({z:0,k:"center",p:C,sc:1});
+  items.sort(function(a,b){ return a.z-b.z; });
+
+  var lig = this.opt.ligLabel, ctr = this.opt.ctrLabel;
+  for(i=0;i<items.length;i++){
+    var it=items[i];
+    if(it.k==="bond"){
+      var bx=it.p.x-C.x, by=it.p.y-C.y, bl=Math.hypot(bx,by);
+      if(bl>rC*0.9){
+        ctx.beginPath(); ctx.moveTo(C.x+bx/bl*rC*0.8,C.y+by/bl*rC*0.8); ctx.lineTo(it.p.x,it.p.y);
+        var bw=Math.max(2.4,0.075*it.p.s*it.sc); ctx.lineCap="round";
+        ctx.lineWidth=bw; ctx.strokeStyle=shade(PAL.bond,-0.28); ctx.stroke();
+        ctx.lineWidth=bw*0.45; ctx.strokeStyle=shade(PAL.bond,0.55); ctx.stroke();
+      }
+    } else if(it.k==="lobe"){
+      var da=0.78+0.22*(it.dep+1)/2, lo;
+      if(mode==="domain") lo=this.lobe(C,it.p,{at:0.6,len:0.62,minor:0.34*it.p.s*it.sc,alpha:0.82*da,col:"#3D8BF2"});
+      else lo=this.lobe(C,it.p,{at:0.5,len:0.55,minor:0.36*it.p.s*it.sc,alpha:0.5*da,col:"#3D8BF2"});
+      if(this.sel.indexOf(it.i)!==-1 && mode==="domain"){
+        ctx.beginPath(); ctx.arc(lo.x,lo.y,lo.r+6,0,Math.PI*2); ctx.strokeStyle="#E8548F"; ctx.lineWidth=2.2; ctx.stroke();
+      }
+      if(this.opt.numbers && mode==="domain") this.badge(lo.x,lo.y-lo.r*0.9,it.i+1);
+    } else if(it.k==="lp"){
+      var da2=0.78+0.22*(it.dep+1)/2;
+      this.lobe(C,it.p,{at:0.6,len:0.62,minor:0.36*it.p.s,alpha:0.82*da2,col:"#9B5CF0"});
+    } else if(it.k==="center"){
+      this.ball(it.p,this.opt.ctrR||0.38,this.opt.ctrColor||PAL.gold,ctr||"A");
+    } else {
+      var pick=this.sel.indexOf(it.i)!==-1;
+      if(pick){
+        ctx.beginPath(); ctx.arc(it.p.x,it.p.y,Math.max(19,0.36*it.p.s*it.sc),0,Math.PI*2);
+        ctx.fillStyle="rgba(232,84,143,0.22)"; ctx.fill();
+        ctx.strokeStyle="#E8548F"; ctx.lineWidth=1.6; ctx.stroke();
+      }
+      var lr=(this.opt.ligR||0.29)*it.sc;
+      this.ball(it.p,lr,this.opt.ligColor||PAL.teal,lig||"");
+      if(this.opt.numbers){ var br=Math.max(3,lr*it.p.s); this.badge(it.p.x+br*0.85,it.p.y-br*0.85,it.i+1); }
+    }
+  }
+  this.arc();
+};
+Scene.prototype.pick = function(x,y){
+  var best=-1, bd=1e9, i;
+  for(i=0;i<this.hits.length;i++){
+    var h=this.hits[i], d=Math.hypot(x-h.x,y-h.y);
+    if(d<h.r && d<bd){ bd=d; best=h.i; }
+  }
+  return best;
+};
+
+/* =========================================================
+   5 · ANIMASI LAYAR PEMBUKA
+   ========================================================= */
+var hero = new Scene($("heroCv"),{ratio:0.82,maxH:520,mode:"domain",ctrR:0.3,ctrLabel:"A"});
+var hSeq=[4,3], hPos=0, hFrom=4, hTo=4, hT=1, hHold=0;
+function heroSet(n){
+  hFrom=hTo; hTo=n; hT=0;
+  $("heroName").textContent = GNAME[n];
+  $("heroSub").textContent  = n+" domain elektron · "+GANGLE[n];
+}
+function heroFrame(dt){
+  if(hT<1){
+    hT=Math.min(1,hT+dt/1.15);
+    var e = hT<0.5 ? 2*hT*hT : 1-Math.pow(-2*hT+2,2)/2;
+    var n=Math.max(hFrom,hTo), v=[], s=[], i;
+    for(i=0;i<n;i++){
+      var a = i<hFrom ? GEOM[hFrom][i] : GEOM[hTo][i];
+      var b = i<hTo   ? GEOM[hTo][i]   : GEOM[hFrom][i];
+      v.push(slerp(a,b,e));
+      s.push((i<hFrom?1:0)*(1-e) + (i<hTo?1:0)*e);
+    }
+    hero.vecs=v; hero.scales=s;
+  } else {
+    hHold+=dt;
+    if(hHold>2.6 && !reduce){ hHold=0; hPos=(hPos+1)%hSeq.length; heroSet(hSeq[hPos]); }
+  }
+  if(!reduce) hero.ry += dt*0.34;
+  hero.draw();
+}
+
+var sim = new Scene($("simCv"),{ratio:0.72,maxH:420,mode:"domain",ctrR:0.3,ctrLabel:"A"});
+var simN = 4, simSettled = false, simPrev = 0, simHold = 0;
+
+function simScatter(retry){
+  if(!retry) simTry=0;
+  simOk=false;
+  var v=[], i;
+  for(i=0;i<simN;i++){
+    var u=Math.random()*2-1, t=Math.random()*Math.PI*2, r=Math.sqrt(1-u*u);
+    v.push(norm([r*Math.cos(t), r*Math.sin(t), u]));
+  }
+  sim.vecs=v; sim.scales=[]; simSettled=false; simPrev=0; simHold=0;
+  $("simStatus").textContent="menyebar…";
+  $("simName").textContent="—";
+}
+function relax(vecs){
+  var N=vecs.length, out=[], i, j, step=0.05;
+  for(i=0;i<N;i++){
+    var f=[0,0,0];
+    for(j=0;j<N;j++){
+      if(i===j) continue;
+      var dx=vecs[i][0]-vecs[j][0], dy=vecs[i][1]-vecs[j][1], dz=vecs[i][2]-vecs[j][2];
+      var r=Math.hypot(dx,dy,dz); if(r<0.03) r=0.03;
+      var w=1/(r*r*r);
+      f[0]+=dx*w; f[1]+=dy*w; f[2]+=dz*w;
+    }
+    out.push(norm([vecs[i][0]+f[0]*step, vecs[i][1]+f[1]*step, vecs[i][2]+f[2]*step]));
+  }
+  return out;
+}
+function minAngle(vecs){
+  var m=999, i, j;
+  for(i=0;i<vecs.length;i++) for(j=i+1;j<vecs.length;j++){
+    var a=angleBetween(vecs[i],vecs[j]); if(a<m) m=a;
+  }
+  return vecs.length<2 ? 0 : m;
+}
+function energy(v){
+  var e=0,i,j;
+  for(i=0;i<v.length;i++) for(j=i+1;j<v.length;j++) e+=1/Math.hypot(v[i][0]-v[j][0],v[i][1]-v[j][1],v[i][2]-v[j][2]);
+  return e;
+}
+var OPT_E={}; [2,3,4,5,6].forEach(function(n){ OPT_E[n]=energy(GEOM[n]); });
+var simTry=0, simOk=false;
+var EXP_MIN={2:180,3:120,4:109.47,5:90,6:90};
+function simCount(){ var c=0,k; for(k in st.simSeen) if(st.simSeen[k]) c++; return c; }
+function lock2State(){
+  var open = st.unlocked>=3 || simCount()>=3, a=$("ask2");
+  $("lock2").hidden=open;
+  if(open) a.removeAttribute("inert"); else a.setAttribute("inert","");
+}
+function simMark(n){
+  st.simSeen[n]=true; sfx("tick");
+  comment(n+" pasangan elektron menyebar membentuk susunan "+GNAME[n].toLowerCase()+". Sudut terkecilnya "+GANGLE[n]+".");
+  var list=[],k; for(k=2;k<=6;k++) if(st.simSeen[k]) list.push(k);
+  $("simSeen").textContent=list.join(", ")+" ("+list.length+" dari 5)";
+  lock2State(); buildSimChips();
+}
+function simFrame(dt){
+  if(!simSettled){
+    for(var k=0;k<4;k++) sim.vecs = relax(sim.vecs);
+    var m = minAngle(sim.vecs);
+    if(Math.abs(m-simPrev) < 0.008){ simHold++; } else { simHold=0; }
+    simPrev = m;
+    if(simHold > 16){
+      var good = Math.abs(energy(sim.vecs)/OPT_E[simN]-1) < 0.003;
+      if(!good && simTry<8){ simTry++; simScatter(true); }
+      else {
+        simSettled = true; simTry = 0;
+        $("simStatus").textContent = "susunan stabil";
+        $("simName").textContent = GNAME[simN];
+        simOk = good;
+        if(good) simMark(simN);
+      }
+    }
+  }
+  if(sim.spin && !reduce) sim.ry += dt*0.3;
+  $("simAngle").textContent = (simSettled && simOk) ? fmt(EXP_MIN[simN])+"°" : fmt(minAngle(sim.vecs))+"°";
+  sim.draw();
+}
+function buildSimChips(){
+  var box=$("simChips"); box.innerHTML="";
+  [2,3,4,5,6].forEach(function(n){
+    var b=document.createElement("button"), seen=!!st.simSeen[n];
+    b.className="chip"+(n===simN?" sel":"")+(seen?" seen":"");
+    b.textContent=n+(seen?" ✓":"");
+    b.setAttribute("aria-label", n+" pasangan elektron"+(seen?", sudah diamati":""));
+    b.onclick=function(){ simN=n; buildSimChips(); simScatter(); };
+    box.appendChild(b);
+  });
+}
+
+var NEU={N:7,O:8,H:0,Be:5,B:6,C:6,F:10,P:16,S:16,Cl:18};
+function shellSVG(k,rev){
+  var a=ATOM[k], R=[25,40,55], s="", NP=[[0,0],[7,2],[-6,4],[3,-7],[-5,-6],[8,-5],[-9,-1],[1,8],[6,8]], i;
+  s+='<svg width="140" height="150" viewBox="0 0 140 150" aria-hidden="true">';
+  [0,1,2].forEach(function(idx){
+    if(!rev && idx>1) return;
+    if(rev && idx>=a.kulit.length) return;
+    var cnt=rev?a.kulit[idx]:0, val=rev && idx===a.kulit.length-1;
+    s+='<circle cx="70" cy="70" r="'+R[idx]+'" fill="none" stroke="'+(val?"var(--gold)":"var(--line)")+
+       '" stroke-width="1.2"'+(val?"":' stroke-dasharray="3 4"')+' opacity="'+(val?0.9:0.8)+'"/>';
+    s+='<g class="orb'+(idx%2?" r":"")+'" style="animation-duration:'+(12+idx*9)+'s">';
+    for(var j=0;j<cnt;j++){
+      var ang=-Math.PI/2 + j*2*Math.PI/cnt;
+      var x=70+R[idx]*Math.cos(ang), y=70+R[idx]*Math.sin(ang);
+      s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(val?4:3)+'" fill="'+(val?"#F2B134":"#29A8E8")+'" stroke="#fff" stroke-width="1"/>';
+    }
+    s+='</g>';
+  });
+  s+='<circle cx="70" cy="70" r="15.5" fill="var(--panel2)" stroke="var(--line)"/>';
+  for(i=0;i<NP.length;i++){
+    s+='<circle cx="'+(70+NP[i][0]).toFixed(1)+'" cy="'+(70+NP[i][1]).toFixed(1)+'" r="4.9" fill="'+(i%2?"#8AA0C4":"#E5484D")+'" stroke="#fff" stroke-width=".8"/>';
+  }
+  s+='<text x="70" y="140" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--text-dim)">'+(rev?a.z+'p · '+NEU[k]+'n':'inti: ?')+'</text>';
+  s+='</svg>';
+  return s;
+}
+function atomCard(k,peran,jml,rev){
+  var a=ATOM[k], q='<span style="color:var(--text-faint)">?</span>';
+  var n=a.kulit.length;
+  return '<div class="atomcard">'+shellSVG(k,rev)+'<div style="min-width:0;flex:1">'+
+    '<div class="who">'+peran+(jml?" · "+jml+" atom":"")+'</div>'+
+    '<h4>'+k+" — "+a.nama+'</h4>'+
+    '<dl>'+
+      '<dt>Nomor atom (Z)</dt><dd>'+a.z+'</dd>'+
+      '<dt>Inti atom</dt><dd>'+(rev?a.z+' proton + '+NEU[k]+' neutron':q)+'</dd>'+
+      '<dt>Konfigurasi elektron</dt><dd>'+a.konf+'</dd>'+
+      '<dt>Susunan per kulit</dt><dd>'+(rev?a.kulit.join(", "):q)+'</dd>'+
+      '<dt>Golongan · periode</dt><dd>'+(rev?a.gol+' · '+a.per:q)+'</dd>'+
+      '<dt>Elektron valensi</dt><dd class="val-hi">'+(rev?a.ev:q)+'</dd>'+
+    '</dl>'+
+    (rev?'<div class="nucleg"><span><i style="background:#E5484D"></i>proton</span><span><i style="background:#8AA0C4"></i>neutron</span><span><i style="background:#29A8E8"></i>elektron kulit dalam</span><span><i style="background:#F2B134"></i>elektron valensi</span></div>':'')+
+    (rev?'<p style="font-size:13px;color:var(--text-dim);margin-top:10px">Kulit terluar: kulit ke-'+n+', berisi '+a.ev+' elektron.</p>'
+        :'<p style="font-size:13px;color:var(--text-faint);margin-top:10px">Tanda ? terisi setelah kamu menjawab.</p>')+
+    '</div></div>';
+}
+function superNum(str){ var map={"⁰":0,"¹":1,"²":2,"³":3,"⁴":4,"⁵":5,"⁶":6,"⁷":7,"⁸":8,"⁹":9}, n=0, i; for(i=0;i<str.length;i++) n=n*10+(map[str.charAt(i)]||0); return n; }
+function rincian(konf,n){ var t=[], sum=0; konf.split(" ").forEach(function(p){ if(p.charAt(0)===String(n)){ var c=superNum(p.slice(2)); t.push(c); sum+=c; } }); return t.join(" + ")+" = "+sum; }
+
+function shuf(a){ var i,j,t; for(i=a.length-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function numOpts(ans,cands,fmt,okWhy,hintFn){
+  var seen={}, out=[], v;
+  seen[ans]=1; out.push({t:fmt(ans),ok:true,why:okWhy});
+  cands.forEach(function(c){ if(c<0||seen[c]) return; seen[c]=1; out.push({t:fmt(c),ok:false,why:hintFn(c)}); });
+  v=ans+1; while(out.length<4){ if(!seen[v]){ seen[v]=1; out.push({t:fmt(v),ok:false,why:hintFn(v)}); } v++; }
+  return out.slice(0,4);
+}
+
+/* =========================================================
+   MISI 1 · DUGAAN
+   ========================================================= */
+
+/* =========================================================
+   CEK PEMAHAMAN BERTAHAP (adaptif + bisa dilipat)
+   ========================================================= */
+function renderGuided(id,intro,steps,onStep,onDone,solved){
+  var box=$(id); box.innerHTML=""; box.classList.remove("fold");
+  box._tok=(box._tok||0)+1; var tok=box._tok;
+  var h=document.createElement("div"); h.className="qh";
+  h.innerHTML='<span>CEK PEMAHAMAN</span><button type="button" class="foldbtn" hidden>Sembunyikan</button>';
+  box.appendChild(h);
+  var fbtn=el(".foldbtn",h);
+  function fold(on){ box.classList.toggle("fold",on); fbtn.hidden=false; fbtn.textContent=on?"Tampilkan jawaban":"Sembunyikan"; }
+  fbtn.onclick=function(){ fold(!box.classList.contains("fold")); };
+  if(intro){ var ip=document.createElement("p"); ip.className="intro"; ip.innerHTML=intro; box.appendChild(ip); }
+  var wrap=document.createElement("div"); box.appendChild(wrap);
+  function finish(){
+    var f=document.createElement("div"); f.className="gfin"; f.textContent="Semua langkah tepat.";
+    wrap.appendChild(f);
+    if(f.scrollIntoView) f.scrollIntoView({behavior:"smooth",block:"nearest"});
+    if(onDone) onDone();
+    fbtn.hidden=false;
+    setTimeout(function(){ if(box._tok===tok) fold(true); },6000);
+  }
+  function card(k){
+    var S=steps[k], c=document.createElement("div"), wrongN=0, pairs=[], btns=[]; c.className="gstep";
+    var g=document.createElement("div"); g.className="gn"; g.textContent="LANGKAH "+(k+1)+" DARI "+steps.length; c.appendChild(g);
+    var q=document.createElement("p"); q.className="gq"; q.innerHTML=S.q; c.appendChild(q);
+    var list=document.createElement("div"); list.className="opts"; c.appendChild(list);
+    var fb=document.createElement("div"); fb.className="fb"; fb.hidden=true; c.appendChild(fb);
+    wrap.appendChild(c);
+    (solved?S.o.slice():shuf(S.o.slice())).forEach(function(o){
+      var b=document.createElement("button"); b.className="opt"; b.innerHTML=o.t; btns.push(b); pairs.push({b:b,o:o});
+      function accept(){
+        b.classList.add("right"); btns.forEach(function(x){ x.disabled=true; });
+        fb.hidden=false; fb.className="fb ok"; fb.innerHTML="<b>Tepat.</b> "+o.why; c.classList.add("done");
+      }
+      b.onclick=function(){
+        if(o.ok){
+          accept(); sfx("ok"); if(AUD.guide) comment("Tepat. "+strip(o.why)); if(onStep) onStep(k);
+          if(k+1<steps.length){ setTimeout(function(){ var nc=card(k+1); if(nc.scrollIntoView) nc.scrollIntoView({behavior:"smooth",block:"nearest"}); },450); }
+          else finish();
+        }else{
+          wrongN++; sfx("no"); if(AUD.guide) comment("Belum tepat. "+strip(o.why));
+          b.classList.add("wrong"); b.disabled=true;
+          fb.hidden=false; fb.className="fb no"; fb.innerHTML="<b>Belum tepat.</b> "+o.why+" Coba pilihan lain.";
+          if(wrongN>=2){
+            var open=pairs.filter(function(x){ return !x.b.disabled; });
+            var cand=open.filter(function(x){ return !x.o.ok; });
+            if(open.length>2 && cand.length){
+              cand[0].b.disabled=true; cand[0].b.classList.add("elim");
+              fb.innerHTML+=" <i>Satu pilihan yang salah disisihkan untukmu.</i>";
+            }
+          }
+        }
+      };
+      list.appendChild(b); b._accept=accept;
+    });
+    if(solved){ pairs.forEach(function(x){ if(x.o.ok) x.b._accept(); }); }
+    return c;
+  }
+  if(solved){ steps.forEach(function(S,k){ card(k); if(onStep) onStep(k); }); fold(true); }
+  else card(0);
+}
+
+/* satu soal pilihan ganda berpembahasan (uji akhir & tantangan) */
+function makeQ(parent,Q,label,cb){
+  var d=document.createElement("div"); d.className="ask"; d.style.marginTop="10px";
+  d.innerHTML='<div class="qh"><span>'+label+'</span></div><p class="q">'+Q.q+'</p><div class="opts"></div><div class="fb" hidden></div>';
+  parent.appendChild(d);
+  var list=el(".opts",d), fb=el(".fb",d), answered=false;
+  shuf(Q.o.map(function(t,i){ return {t:t,i:i}; })).forEach(function(o){
+    var btn=document.createElement("button"); btn.className="opt"; btn.textContent=o.t;
+    btn.onclick=function(){
+      if(answered) return; answered=true;
+      var benar=(o.i===Q.a);
+      Array.prototype.forEach.call(list.children,function(c){ c.disabled=true; });
+      btn.classList.add(benar?"right":"wrong");
+      if(!benar){ Array.prototype.forEach.call(list.children,function(c){ if(c.textContent===Q.o[Q.a]) c.classList.add("right"); }); }
+      fb.hidden=false; fb.className="fb "+(benar?"ok":"no");
+      fb.innerHTML="<b>"+(benar?"Benar.":"Belum tepat.")+"</b> "+Q.e;
+      cb(benar);
+    };
+    list.appendChild(btn);
+  });
+}
+
+var NAMA=["Dugaan awal","Pasangan elektron menolak","Hitung PEI & PEB","Tentukan bentuk","Jawab masalahmu"];
+var NEXTDEF=[
+  {id:"next1",to:2,lab:"Mulai menyelidiki →",wait:"Pilih dugaanmu dulu"},
+  {id:"next2",to:3,lab:"Lanjut ke Misi 3: hitung PEI & PEB →",wait:"Amati simulasi dan selesaikan cek dulu"},
+  {id:"next3",to:4,lab:"Lanjut ke Misi 4: tentukan bentuk →",wait:"Selesaikan hitungan dulu"},
+  {id:"next4",to:5,lab:"Lanjut ke Misi 5: jawab masalahmu →",wait:"Tandai kedua molekul selesai"}
+];
+function unlock(n){ if(st.unlocked<n) st.unlocked=n; }
+function setNext(id,to,lab){
+  var b=$(id); if(!b) return;
+  b.disabled=false; b.textContent=lab;
+  b.onclick=function(){ go(String(to)); };
+}
+function syncNext(){
+  NEXTDEF.forEach(function(d){
+    var b=$(d.id); if(!b) return;
+    if(st.unlocked>=d.to) setNext(d.id,d.to,d.lab);
+    else { b.disabled=true; b.textContent=d.wait; b.onclick=null; }
+  });
+}
+function doneCount(){ var c=0,k; for(k in st.done) if(st.done[k]) c++; return c; }
+
+function buildHyp(){
+  var box=$("ask1");
+  box.innerHTML='<div class="qh">DUGAANMU</div><p class="q">Menurutmu, bagaimana bentuk NH₃ dibanding SO₃?</p><div class="opts"></div><div class="fb ok" hidden></div>';
+  var list=el(".opts",box), fb=el(".fb",box);
+  [{k:"sama",t:"Sama, karena sama-sama mengikat 3 atom"},
+   {k:"beda",t:"Berbeda, pasti ada faktor lain selain jumlah atom"},
+   {k:"ragu",t:"Belum tahu, mau menyelidiki dulu"}].forEach(function(o){
+    var b=document.createElement("button"); b.className="opt"; b.textContent=o.t;
+    b.onclick=function(){
+      st.hyp=o.k;
+      Array.prototype.forEach.call(list.children,function(c){ c.classList.remove("pick"); });
+      b.classList.add("pick");
+      fb.hidden=false; fb.innerHTML="<b>Dugaan tercatat.</b> Kita uji di Misi 5, setelah kamu punya bukti.";
+      unlock(2); setNext("next1",2,NEXTDEF[0].lab); refresh();
+    };
+    list.appendChild(b);
+  });
+}
+
+/* =========================================================
+   MISI 2 · TOLAKAN
+   ========================================================= */
+$("btnScatter").onclick=function(){ simScatter(); };
+$("btnSpin1").onclick=function(){
+  sim.spin=!sim.spin;
+  this.classList.toggle("on",sim.spin); this.setAttribute("aria-pressed",sim.spin);
+};
+function buildAsk2(){
+  var steps=[
+   {q:"Kamu mengacak posisi awal berkali-kali pada jumlah pasangan yang sama. Apa yang terjadi pada susunan akhirnya?",
+    o:[{t:"Selalu sama, walau posisi awalnya berbeda",ok:true,why:"Susunan akhir ditentukan oleh aturan, bukan kebetulan."},
+       {t:"Berbeda setiap kali diacak",ok:false,why:"Acak ulang lagi pada jumlah yang sama dan bandingkan sudut terkecilnya."},
+       {t:"Bergantung pada kecepatan putar",ok:false,why:"Memutar hanya mengubah sudut pandangmu, bukan susunannya."}]},
+   {q:"Mengapa titik-titik pasangan elektron itu saling menjauh?",
+    o:[{t:"Muatannya sejenis, jadi saling tolak-menolak",ok:true,why:"Itulah inti <b>VSEPR</b>: <i>Valence Shell Electron Pair Repulsion</i>."},
+       {t:"Muatannya sejenis, jadi saling tarik-menarik",ok:false,why:"Kalau saling menarik, titik akan menumpuk. Padahal mereka berpencar."},
+       {t:"Titik bergerak acak tanpa sebab",ok:false,why:"Geraknya selalu berhenti di susunan yang sama, jadi ada penyebabnya."}]},
+   {q:"Atom X punya <b>3 PEI</b> (dipakai bersama atom lain) dan <b>1 PEB</b> (milik X sendiri). Berapa domain yang saling menolak di sekitar X?",
+    o:[{t:"4 domain",ok:true,why:"PEB juga bermuatan negatif, jadi ikut menolak: 3 + 1 = 4 domain."},
+       {t:"3 domain",ok:false,why:"Itu hanya PEI. Apakah pasangan milik X sendiri tidak ikut menolak?"},
+       {t:"1 domain",ok:false,why:"Itu hanya PEB. PEI juga ikut menolak."},
+       {t:"8 domain",ok:false,why:"Hitung pasangannya, bukan elektronnya."}]}
+  ];
+  steps.shift();
+  renderGuided("ask2",null,steps,null,function(){
+    $("t2reveal").hidden=false;
+    unlock(3); setNext("next2",3,NEXTDEF[1].lab); refresh();
+  },st.unlocked>=3);
+  if(st.unlocked>=3) $("t2reveal").hidden=false;
+  lock2State();
+}
+
+/* =========================================================
+   MISI 3 · BENGKEL MOLEKUL: rakit dari palet atom  (INDIKATOR 1)
+   ========================================================= */
+var LW={CX:230,CY:150,RB:104,SNAP:122,PY:318};
+var CPK={
+  N:{c:"#3B5BDB",t:"#FFFFFF",r:30,s:0.38},
+  H:{c:"#EEF2F8",t:"#0B1F3A",r:18,s:0.24},
+  O:{c:"#E03131",t:"#FFFFFF",r:25,s:0.31},
+  S:{c:"#F2C230",t:"#0B1F3A",r:34,s:0.43},
+  C:{c:"#4B5262",t:"#FFFFFF",r:30,s:0.38}
+};
+function lwAng(i,n){ return (-90+i*360/n)*Math.PI/180; }
+function lwSlot(i){ var a=lwAng(i,M().n); return [LW.CX+Math.cos(a)*LW.RB, LW.CY+Math.sin(a)*LW.RB]; }
+function lwPal(kind,i){ return kind==="c" ? [64,380] : [168+i*92,380]; }
+function lwDotHome(k){ var R=st.lw.dots.length; return [LW.CX+(k-(R-1)/2)*42, LW.CY+CPK[M().pusat].r+30]; }
+function lwRing(x,y,r,cnt,start,col){
+  var s='<g pointer-events="none">', i, a;
+  for(i=0;i<cnt;i++){ a=start+i*2*Math.PI/cnt;
+    s+='<circle cx="'+(x+Math.cos(a)*r).toFixed(1)+'" cy="'+(y+Math.sin(a)*r).toFixed(1)+'" r="4.3" fill="'+col+'" stroke="#fff" stroke-width="1.1"/>'; }
+  return s+'</g>';
+}
+function lwInit(full){
+  var m=M(), p=ATOM[m.pusat], rest=p.ev-m.n*(m.order||1), i, L={c:!!full,lt:[],dots:[],pairs:0,done:!!full,hint:""};
+  for(i=0;i<m.n;i++) L.lt.push(full?i:-1);
+  for(i=0;i<rest;i++) L.dots.push({paired:!!full});
+  L.pairs=full?Math.floor(rest/2):0;
+  st.lw=L; st.drag=null;
+}
+function lwBonded(){ var c=0,i; for(i=0;i<st.lw.lt.length;i++) if(st.lw.lt[i]>=0) c++; return c; }
+function lwAtom(e,x,y,r,key,locked){
+  var c=CPK[e], f=function(v){ return v.toFixed(1); };
+  var s='<g'+(key?' class="lg'+(locked?" dn":"")+'" data-k="'+key+'"':'')+'>';
+  s+='<ellipse cx="'+f(x+r*0.12)+'" cy="'+f(y+r*0.94)+'" rx="'+f(r*0.8)+'" ry="'+f(r*0.2)+'" fill="rgba(10,35,66,0.16)"/>';
+  s+='<circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+r+'" fill="url(#ag-'+e+')" stroke="'+shade(c.c,-0.55)+'" stroke-width="1.2"/>';
+  s+='<ellipse cx="'+f(x-r*0.34)+'" cy="'+f(y-r*0.42)+'" rx="'+f(r*0.24)+'" ry="'+f(r*0.14)+'" fill="#fff" opacity="0.55" transform="rotate(-35 '+f(x-r*0.34)+' '+f(y-r*0.42)+')"/>';
+  s+='<text x="'+f(x)+'" y="'+f(y+0.5)+'" text-anchor="middle" dominant-baseline="central" font-size="'+Math.round(r*0.9)+'" font-weight="700" font-family="Space Grotesk, sans-serif" fill="'+c.t+'" pointer-events="none">'+e+'</text>';
+  if(key && !locked) s+='<circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+(r+14)+'" fill="transparent"/>';
+  return s+'</g>';
+}
+function drawLewis(){
+  var m=M(), p=ATOM[m.pusat], ord=m.order||1, L=st.lw, CX=LW.CX, CY=LW.CY, n=m.n, dr=st.drag, s="", i, k;
+  var rc=CPK[m.pusat].r, rl=CPK[m.ligan].r, f=function(v){ return v.toFixed(1); };
+  var bonded=lwBonded(), rest=L.dots.length, allB=(L.c && bonded===n);
+  s+='<defs>';
+  [m.pusat,m.ligan].forEach(function(e){ var c=CPK[e].c;
+    s+='<radialGradient id="ag-'+e+'" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="'+shade(c,0.6)+'"/><stop offset="0.45" stop-color="'+c+'"/><stop offset="1" stop-color="'+shade(c,-0.5)+'"/></radialGradient>'; });
+  s+='<radialGradient id="lobeP" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#29A8E8" stop-opacity=".6"/><stop offset="1" stop-color="#29A8E8" stop-opacity=".12"/></radialGradient>';
+  s+='<radialGradient id="lobeV" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#9B5CF0" stop-opacity=".8"/><stop offset="1" stop-color="#9B5CF0" stop-opacity=".14"/></radialGradient>';
+  s+='<radialGradient id="wsBg" cx="50%" cy="40%" r="70%"><stop offset="0" stop-color="#ffffff" stop-opacity=".8"/><stop offset="1" stop-color="#ffffff" stop-opacity=".1"/></radialGradient>';
+  s+='</defs>';
+  s+='<rect x="6" y="6" width="448" height="302" rx="18" fill="url(#wsBg)" stroke="var(--line)" stroke-dasharray="5 6"/>';
+  s+='<rect x="6" y="320" width="448" height="114" rx="18" fill="rgba(255,255,255,0.6)" stroke="var(--line)"/>';
+  s+='<text x="20" y="27" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--text-faint)">AREA RAKIT</text>';
+  s+='<text x="20" y="342" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--text-faint)">PALET ATOM</text>';
+
+  /* petunjuk letak */
+  if(!L.c){
+    s+='<circle cx="'+CX+'" cy="'+CY+'" r="'+rc+'" fill="none" stroke="var(--teal)" stroke-width="1.6" stroke-dasharray="5 5" opacity=".7"/>';
+    s+='<text x="'+CX+'" y="'+(CY+rc+20)+'" text-anchor="middle" font-size="12" fill="var(--text-faint)">taruh atom pusat di sini</text>';
+  } else {
+    for(i=0;i<n;i++){
+      if(L.lt.indexOf(i)===-1){ var sp=lwSlot(i);
+        s+='<circle cx="'+f(sp[0])+'" cy="'+f(sp[1])+'" r="'+rl+'" fill="none" stroke="var(--teal)" stroke-width="1.5" stroke-dasharray="4 5" opacity=".6"/>'; }
+    }
+  }
+
+  /* batang ikatan + lobus PEI */
+  for(i=0;i<n;i++){
+    var si=L.lt.indexOf(i); /* indeks atom di slot i */
+  }
+  for(var a=0;a<n;a++){
+    var lig=-1; for(i=0;i<n;i++) if(L.lt[i]===a) lig=i;
+    if(lig<0 || (dr && dr.kind==="l" && dr.idx===lig)) continue;
+    var sp2=lwSlot(a), dx=sp2[0]-CX, dy=sp2[1]-CY, dist=Math.hypot(dx,dy), ux=dx/dist, uy=dy/dist, px=-uy, py=ux;
+    var offs = ord===1 ? [0] : [-8,8], bw = ord===1 ? 11 : 7, q;
+    for(q=0;q<offs.length;q++){
+      var x1=CX+px*offs[q], y1=CY+py*offs[q], x2=sp2[0]+px*offs[q], y2=sp2[1]+py*offs[q];
+      s+='<line x1="'+f(x1)+'" y1="'+f(y1)+'" x2="'+f(x2)+'" y2="'+f(y2)+'" stroke="#7F90AE" stroke-width="'+bw+'" stroke-linecap="round"/>';
+      s+='<line x1="'+f(x1)+'" y1="'+f(y1)+'" x2="'+f(x2)+'" y2="'+f(y2)+'" stroke="#C7D2E6" stroke-width="'+(bw*0.55)+'" stroke-linecap="round"/>';
+    }
+    var mx=CX+ux*(rc+(dist-rc-rl)/2+4), my=CY+uy*(rc+(dist-rc-rl)/2+4), ang=Math.atan2(dy,dx)*180/Math.PI;
+    s+='<ellipse cx="'+f(mx)+'" cy="'+f(my)+'" rx="'+(ord===1?30:32)+'" ry="'+(ord===1?15:24)+'" transform="rotate('+f(ang)+' '+f(mx)+' '+f(my)+')" fill="url(#lobeP)" stroke="#29A8E8" stroke-opacity=".55"/>';
+    for(q=0;q<offs.length;q++){
+      var ox=mx+px*offs[q]*0.9, oy=my+py*offs[q]*0.9;
+      s+='<circle cx="'+f(ox-ux*6)+'" cy="'+f(oy-uy*6)+'" r="3.8" fill="#F2B134" stroke="#fff" stroke-width=".8"/>';
+      s+='<circle cx="'+f(ox+ux*6)+'" cy="'+f(oy+uy*6)+'" r="3.8" fill="#29A8E8" stroke="#fff" stroke-width=".8"/>';
+    }
+  }
+
+  /* PEB: lobus ungu */
+  if(L.c){
+    var pb=0;
+    for(i=0;i<L.dots.length;i++){ if(L.dots[i].paired) pb++; }
+    pb=Math.floor(pb/2);
+    for(k=0;k<pb;k++){
+      var lx=CX+(k-(pb-1)/2)*58, ly=CY+rc+38;
+      s+='<ellipse cx="'+f(lx)+'" cy="'+f(ly)+'" rx="25" ry="33" fill="url(#lobeV)" stroke="#9B5CF0" stroke-opacity=".7"/>';
+      s+='<circle cx="'+f(lx-7)+'" cy="'+f(ly-2)+'" r="3.8" fill="#F2B134" stroke="#fff" stroke-width=".8"/><circle cx="'+f(lx+7)+'" cy="'+f(ly-2)+'" r="3.8" fill="#F2B134" stroke="#fff" stroke-width=".8"/>';
+      s+='<text x="'+f(lx)+'" y="'+f(ly+49)+'" text-anchor="middle" font-size="11" font-weight="700" font-family="IBM Plex Mono, monospace" fill="#7A35D9">PEB</text>';
+    }
+  }
+
+  /* atom pusat */
+  if(L.c) s+=lwAtom(m.pusat,CX,CY,rc,null);
+
+  /* elektron atom pusat: menunggu pasangan di tiap arah, sisanya di bawah */
+  if(L.c){
+    for(i=0;i<n;i++){
+      if(L.lt.indexOf(i)!==-1) continue;
+      var ga=lwAng(i,n);
+      for(k=0;k<ord;k++){ var oa=ga+(k-(ord-1)/2)*0.34;
+        s+='<circle cx="'+f(CX+Math.cos(oa)*(rc+8))+'" cy="'+f(CY+Math.sin(oa)*(rc+8))+'" r="4.6" fill="#F2B134" stroke="#fff" stroke-width="1.2" pointer-events="none"/>'; }
+    }
+    for(k=0;k<rest;k++){
+      if(L.dots[k].paired) continue;
+      var hp=lwDotHome(k);
+      if(!allB){ s+='<circle cx="'+f(hp[0])+'" cy="'+f(hp[1])+'" r="4.6" fill="#F2B134" stroke="#fff" stroke-width="1.2" opacity=".85" pointer-events="none"/>'; continue; }
+      if(dr&&dr.kind==="e"&&dr.idx===k) continue;
+      s+='<g class="lg" data-k="e'+k+'"><circle class="lgp" cx="'+f(hp[0])+'" cy="'+f(hp[1])+'" r="15" fill="none" stroke="#F2B134" stroke-width="2.4"/>'+
+         '<circle cx="'+f(hp[0])+'" cy="'+f(hp[1])+'" r="8" fill="#F2B134" stroke="#fff" stroke-width="1.4"/><circle cx="'+f(hp[0])+'" cy="'+f(hp[1])+'" r="26" fill="transparent"/></g>';
+    }
+  }
+
+  /* atom terikat (di slot) dan elektron bebas milik ligan */
+  var lockAll=L.done;
+  for(i=0;i<n;i++){
+    if(L.lt[i]<0 || (dr && dr.kind==="l" && dr.idx===i)) continue;
+    var spp=lwSlot(L.lt[i]);
+    var lpairs=Math.floor((ATOM[m.ligan].ev-ord)/2), base=Math.atan2(spp[1]-CY,spp[0]-CX), q2;
+    for(q2=0;q2<lpairs;q2++){
+      var aa=base+(q2-(lpairs-1)/2)*1.25, ex=spp[0]+Math.cos(aa)*(rl+9), ey=spp[1]+Math.sin(aa)*(rl+9), ppx=-Math.sin(aa), ppy=Math.cos(aa);
+      s+='<circle cx="'+f(ex+ppx*3.6)+'" cy="'+f(ey+ppy*3.6)+'" r="2.8" fill="#29A8E8"/><circle cx="'+f(ex-ppx*3.6)+'" cy="'+f(ey-ppy*3.6)+'" r="2.8" fill="#29A8E8"/>';
+    }
+    s+=lwAtom(m.ligan,spp[0],spp[1],rl,"l"+i,lockAll);
+  }
+
+  /* token di palet */
+  if(!L.c && !(dr&&dr.kind==="c")){
+    var cp=lwPal("c",0);
+    s+='<circle class="lgp" cx="'+cp[0]+'" cy="'+cp[1]+'" r="'+(rc+8)+'" fill="none" stroke="var(--teal)" stroke-width="2.4"/>';
+    s+=lwAtom(m.pusat,cp[0],cp[1],rc,"c",false)+lwRing(cp[0],cp[1],rc+9,p.ev,-Math.PI/2,"#F2B134");
+    s+='<text x="'+cp[0]+'" y="'+(cp[1]+rc+26)+'" text-anchor="middle" font-size="11" fill="var(--text-faint)">pusat · '+p.ev+' e⁻</text>';
+  } else if(!L.c){
+    var cp2=lwPal("c",0); s+='<text x="'+cp2[0]+'" y="'+(cp2[1]+rc+26)+'" text-anchor="middle" font-size="11" fill="var(--text-faint)">pusat · '+p.ev+' e⁻</text>';
+  }
+  var firstFree=-1;
+  for(i=0;i<n;i++){ if(L.lt[i]<0){ firstFree=i; break; } }
+  for(i=0;i<n;i++){
+    if(L.lt[i]>=0 || (dr && dr.kind==="l" && dr.idx===i)) continue;
+    var lp=lwPal("l",i);
+    if(L.c && i===firstFree) s+='<circle class="lgp" cx="'+lp[0]+'" cy="'+lp[1]+'" r="'+(rl+8)+'" fill="none" stroke="var(--teal)" stroke-width="2.4"/>';
+    s+=lwAtom(m.ligan,lp[0],lp[1],rl,"l"+i,false)+lwRing(lp[0],lp[1],rl+8,ATOM[m.ligan].ev,Math.PI,"#29A8E8");
+    s+='<text x="'+lp[0]+'" y="'+(lp[1]+rl+24)+'" text-anchor="middle" font-size="11" fill="var(--text-faint)">'+ATOM[m.ligan].ev+' e⁻</text>';
+  }
+  /* yang sedang diseret selalu paling atas */
+  if(dr){
+    if(dr.kind==="c") s+=lwAtom(m.pusat,dr.p[0],dr.p[1],rc,null)+lwRing(dr.p[0],dr.p[1],rc+9,p.ev,-Math.PI/2,"#F2B134");
+    if(dr.kind==="l") s+=lwAtom(m.ligan,dr.p[0],dr.p[1],rl,null)+lwRing(dr.p[0],dr.p[1],rl+8,ATOM[m.ligan].ev,Math.PI,"#29A8E8");
+    if(dr.kind==="e") s+='<circle cx="'+f(dr.p[0])+'" cy="'+f(dr.p[1])+'" r="9" fill="#F2B134" stroke="#fff" stroke-width="1.6"/>';
+  }
+  var near=false;
+  if(dr && dr.kind==="l" && L.c) near=Math.hypot(dr.p[0]-CX,dr.p[1]-CY)<=LW.SNAP;
+  if(near) s+='<circle cx="'+CX+'" cy="'+CY+'" r="'+(rc+10)+'" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-dasharray="5 4"/>';
+  $("lewisSvg").innerHTML=s;
+
+  /* panel elektron */
+  var used=bonded*ord, pair=L.dots.filter(function(d){ return d.paired; }).length, pebN=Math.floor(pair/2), eb="";
+  for(i=0;i<p.ev;i++){
+    var cls="";
+    if(L.c){ cls = i<used ? "u" : (i<used+pair ? "p" : "f"); }
+    eb+='<i class="'+cls+'"></i>';
+  }
+  $("evBar").innerHTML=eb;
+  var cap;
+  if(!L.c) cap=m.pusat+" punya <b>"+p.ev+"</b> elektron valensi.";
+  else if(bonded<n) cap="Dipakai berikatan: <b>"+used+"</b> dari "+p.ev+" elektron.";
+  else if(!L.done) cap="Dipakai berikatan <b>"+used+"</b>, tersisa <b>"+(p.ev-used)+"</b> elektron: "+(p.ev-used)/2+" pasang menjadi PEB.";
+  else cap="PEB = ("+p.ev+" − "+used+") ÷ 2 = <b>"+m.peb+"</b>.";
+  $("evCap").innerHTML=cap;
+  $("lwPei").textContent=bonded; $("lwPeb").textContent=pebN; $("lwDom").textContent=bonded+pebN;
+
+  var ph = !L.c ? 1 : (bonded<n ? 2 : (L.done ? 4 : 3));
+  Array.prototype.forEach.call($("lwSteps").children,function(sp3){
+    var v=Number(sp3.getAttribute("data-s"));
+    sp3.className = v<ph ? "ok" : (v===ph ? "on" : "");
+  });
+  var nar;
+  if(L.hint) nar="<b>"+L.hint+"</b>";
+  else if(near) nar="<b>Lepaskan</b> untuk membentuk ikatan.";
+  else if(ph===1) nar="Seret atom <b>"+m.pusat+"</b> dari palet ke area rakit.";
+  else if(ph===2) nar=(bonded===0?"Seret atom <b>"+m.ligan+"</b> ke dekat <b>"+m.pusat+"</b>.":"<b>Ikatan ke-"+bonded+"</b> terbentuk.")+" Sepasang elektron dipakai bersama menjadi <b>PEI</b>.";
+  else if(ph===3) nar="Semua atom berikatan. Tersisa <b>"+(p.ev-used)+" elektron</b> pada "+m.pusat+". Seret satu ke yang lain agar berpasangan: itulah <b>PEB</b>.";
+  else nar="<b>Selesai.</b> "+m.pusat+" punya "+bonded+" PEI"+(m.peb>0?" dan "+pebN+" PEB":" dan tidak punya PEB")+", jadi "+(bonded+pebN)+" domain ("+m.notasi+").";
+  $("lewisNarr").innerHTML=nar;
+}
+function resultC(){
+  var m=M(), p=ATOM[m.pusat], ord=m.order||1, pakai=m.n*ord, dom=m.n+m.peb;
+  $("resC").hidden=false;
+  $("resC").innerHTML='<div class="res-h">Hasil untuk '+m.rumus+'</div>'+
+    '<div class="resrow"><span>PEI<b>'+m.n+'</b></span><span>PEB<b>'+m.peb+'</b></span><span>Domain<b>'+dom+'</b></span><span>Notasi<b>'+m.notasi+'</b></span></div>'+
+    '<div class="formula">PEB = ( EV − elektron berikatan ) ÷ 2 = ( '+p.ev+' − '+pakai+' ) ÷ 2 = '+m.peb+'</div>'+
+    '<p class="evcap" style="margin-top:10px">'+m.oktet+'</p>';
+}
+function lwFinish(){
+  var m=M();
+  setOk("B"); setOk("C"); resultC(); $("blkC").hidden=false;
+  unlock(4); setNext("next3",4,NEXTDEF[2].lab); refresh(); sfx("win");
+  comment("Selesai. "+m.rumus+" punya "+m.n+" P E I dan "+m.peb+" P E B, jadi "+(m.n+m.peb)+" domain.");
+  setTimeout(function(){ if($("blkC").scrollIntoView) $("blkC").scrollIntoView({behavior:"smooth",block:"nearest"}); },400);
+}
+function lwCheck(){
+  var m=M(), L=st.lw, rest=L.dots.length, pair=L.dots.filter(function(d){ return d.paired; }).length;
+  if(!L.done && L.c && lwBonded()===m.n && pair===rest){ L.done=true; lwFinish(); }
+}
+function buildHitung(){
+  var m=M(), okC=isOk("C");
+  setOk("A");
+  $("m3mol").innerHTML = m.rumus;
+  $("m3info").innerHTML = "Atom pusat <b>"+m.pusat+"</b> mengikat <b>"+m.n+" atom "+m.ligan+"</b> dengan ikatan <b>"+((m.order||1)>1?"rangkap dua":"tunggal")+"</b>.";
+  var nt=$("m3note"); if(m.catatan){ nt.hidden=false; nt.innerHTML='<span class="nt">CATATAN</span>'+m.catatan; } else { nt.hidden=true; }
+  $("blkB").hidden=false; $("blkC").hidden=!okC; $("resC").hidden=!okC;
+  $("atomCards").innerHTML = atomCard(m.pusat,"ATOM PUSAT",0,true) + atomCard(m.ligan,"ATOM TERIKAT",m.n,true);
+  lwInit(okC);
+  if(okC) resultC();
+  drawLewis();
+}
+$("btnBondAll").onclick=function(){
+  var m=M(), L=st.lw, i; if(L.done) return;
+  L.c=true; for(i=0;i<m.n;i++) L.lt[i]=i;
+  for(i=0;i<L.dots.length;i++) L.dots[i].paired=true;
+  L.pairs=Math.floor(L.dots.length/2); L.hint="";
+  sfx("snap"); lwCheck(); drawLewis();
+};
+$("btnBondReset").onclick=function(){ lwInit(false); drawLewis(); sfx("tick"); };
+(function(){
+  var lw=$("lewisSvg");
+  function pt(e){
+    var r=lw.getBoundingClientRect(), vb=lw.viewBox.baseVal;
+    var sc=Math.min(r.width/vb.width, r.height/vb.height);
+    var ox=(r.width-vb.width*sc)/2, oy=(r.height-vb.height*sc)/2;
+    return [(e.clientX-r.left-ox)/sc, (e.clientY-r.top-oy)/sc];
+  }
+  lw.addEventListener("pointerdown",function(e){
+    var g=e.target.closest ? e.target.closest("[data-k]") : null; if(!g) return;
+    var L=st.lw; if(L.done) return;
+    var k=g.getAttribute("data-k"), kind=k.charAt(0), idx=Number(k.slice(1))||0;
+    if(kind==="l" && L.lt[idx]>=0){ if(L.dots.some(function(d){ return d.paired; })) return; L.lt[idx]=-1; }
+    if(kind==="e" && L.dots[idx].paired) return;
+    L.hint="";
+    st.drag={kind:kind,idx:idx,id:e.pointerId,p:pt(e)};
+    try{ lw.setPointerCapture(e.pointerId); }catch(x){}
+    e.preventDefault(); document.body.classList.add("dragging"); sfx("tick"); drawLewis();
+  });
+  lw.addEventListener("selectstart",function(e){ e.preventDefault(); });
+  lw.addEventListener("pointermove",function(e){
+    if(!st.drag || e.pointerId!==st.drag.id) return;
+    st.drag.p=pt(e); drawLewis();
+  });
+  function end(e){
+    if(!st.drag || e.pointerId!==st.drag.id) return;
+    var d=st.drag, q=pt(e), L=st.lw, m=M(); st.drag=null; document.body.classList.remove("dragging");
+    if(e.type==="pointerup"){
+      if(d.kind==="c"){
+        if(q[1]<LW.PY-6 && Math.hypot(q[0]-LW.CX,q[1]-LW.CY)<160){
+          L.c=true; sfx("snap"); comment("Atom pusat siap. Sekarang seret atom "+m.ligan+" ke dekatnya.");
+        }
+      } else if(d.kind==="l"){
+        var dist=Math.hypot(q[0]-LW.CX,q[1]-LW.CY);
+        if(L.c && dist<=LW.SNAP){
+          var ang=Math.atan2(q[1]-LW.CY,q[0]-LW.CX), best=-1, bd=9, s2;
+          for(s2=0;s2<m.n;s2++){
+            if(L.lt.indexOf(s2)!==-1) continue;
+            var df=Math.abs(Math.atan2(Math.sin(ang-lwAng(s2,m.n)),Math.cos(ang-lwAng(s2,m.n))));
+            if(df<bd){ bd=df; best=s2; }
+          }
+          if(best>=0){
+            L.lt[d.idx]=best; sfx("snap");
+            var b=lwBonded();
+            if(b<m.n) comment(b===1 ? "Ikatan pertama. Sepasang elektron dipakai bersama, itulah P E I." : "Ikatan ke-"+b+".");
+            else if(L.dots.length>0) comment("Semua atom berikatan. Tersisa "+L.dots.length+" elektron pada "+m.pusat+". Pasangkan menjadi P E B.");
+          }
+        } else if(!L.c && q[1]<LW.PY-6){ L.hint="Letakkan atom pusat dulu."; sfx("no"); }
+      } else if(d.kind==="e"){
+        var j, hit=-1;
+        for(j=0;j<L.dots.length;j++){
+          if(j===d.idx || L.dots[j].paired) continue;
+          var h=lwDotHome(j); if(Math.hypot(q[0]-h[0],q[1]-h[1])<=38){ hit=j; break; }
+        }
+        if(hit>=0){ L.dots[d.idx].paired=true; L.dots[hit].paired=true; L.pairs++; sfx("ok"); }
+      }
+    }
+    lwCheck(); drawLewis();
+  }
+  lw.addEventListener("pointerup",end);
+  lw.addEventListener("pointercancel",end);
+})();
+
+/* =========================================================
+   MISI 4 · BENTUK MOLEKUL  (TP 2)
+   ========================================================= */
+
+var WHY={
+ NH3:{ alasan:"4 domain tersusun tetrahedral, tetapi 1 domain adalah PEB yang tidak terlihat. Jadi 3 atom H membentuk piramida trigonal.",
+  q:"Sudut H–N–H yang kamu ukur sekitar 107°, lebih kecil dari 109,5° (sudut tetrahedral ideal). Mengapa?",
+  e:"Tolakan PEB lebih kuat daripada PEI. PEB “menekan” ketiga ikatan N–H sehingga sudutnya menyempit dari 109,5° menjadi sekitar 107°.",
+  o:[{t:"PEB menolak lebih kuat daripada PEI, sehingga ikatan N–H terdorong saling mendekat",ok:true},
+     {t:"Atom H terlalu kecil sehingga sudutnya mengecil",ok:false,why:"Sudut ditentukan oleh tolakan antar domain, bukan ukuran atom."},
+     {t:"PEB menarik atom H mendekat",ok:false,why:"PEB bermuatan negatif, jadi ia menolak, bukan menarik."},
+     {t:"Model 3D kurang teliti",ok:false,why:"Sudut dihitung dari koordinat model dan sesuai nilai teori VSEPR."}]},
+ SO3:{ alasan:"3 domain, semuanya atom, tersusun datar membentuk segitiga sama sisi.",
+  q:"Ketiga sudut O–S–O pada SO₃ sama besar, yaitu 120°. Mengapa?",
+  e:"Tanpa PEB, ketiga domain sama jenisnya dan saling menolak sama kuat, sehingga tersebar merata: 360° ÷ 3 = 120°.",
+  o:[{t:"Ketiga domain sama-sama PEI dan tidak ada PEB yang menolak lebih kuat, jadi saling menjauh sama jauh",ok:true},
+     {t:"Atom S lebih besar daripada atom O",ok:false,why:"Ukuran atom tidak menentukan sudut antar domain."},
+     {t:"SO₃ punya 1 PEB yang menyeimbangkan tolakan",ok:false,why:"SO₃ tidak punya PEB (PEB = 0). Lihat hasil Misi 3."},
+     {t:"Ikatan S=O lebih pendek daripada S–O",ok:false,why:"Panjang ikatan tidak mengubah fakta bahwa tiga domain saling menolak sama kuat."}]}
+};
+var molScene = new Scene($("molCv"),{ratio:1.0,maxH:540,mode:"both",numbers:true});
+function lpGamma(w){
+  var bg=Math.PI/2, be=1e9, g, c, s, dot, dbb, dl, e;
+  for(g=Math.PI/2+0.01; g<3.0; g+=0.0008){
+    c=Math.cos(g); s=Math.sin(g); dot=c*c-0.5*s*s;
+    dbb=Math.sqrt(Math.max(1e-9,2-2*dot)); dl=Math.sqrt(2-2*c);
+    e=3/dbb+3*w/dl; if(e<be){ be=e; bg=g; }
+  }
+  return bg;
+}
+function nhVecs(w){
+  var g=lpGamma(w), c=Math.cos(g), s=Math.sin(g), o=[], i;
+  for(i=0;i<3;i++){ var a=i*2*Math.PI/3; o.push([s*Math.cos(a),c,s*Math.sin(a)]); }
+  return o;
+}
+function nhAngle(w){ var g=lpGamma(w), c=Math.cos(g), s=Math.sin(g); return Math.acos(c*c-0.5*s*s)*180/Math.PI; }
+function lpUpdate(v,user){
+  var w=v/100, ang=nhAngle(w), note;
+  if(v<=102) st.lpLow[M().id]=true;
+  if(user && Math.abs(v-122)<=4) st.lpReal[M().id]=true;
+  molScene.vecs=nhVecs(w);
+  $("lpAngle").textContent=fmt(ang)+"°";
+  if(v<=102) note="PEB menolak <b>sama kuat</b> dengan PEI, jadi empat domain tersusun tetrahedral sempurna: 109,5°.";
+  else if(Math.abs(v-122)<=3) note="Inilah keadaan nyata: PEB menolak <b>lebih kuat</b> daripada PEI, sehingga ikatan N–H tertekan dan sudutnya menyempit menjadi ±107°.";
+  else if(v<122) note="PEB baru sedikit lebih kuat daripada PEI, sudut masih dekat dengan tetrahedral ideal.";
+  else note="Tolakan PEB dibuat lebih kuat daripada kenyataan, sudut makin sempit.";
+  $("lpNote").innerHTML=note;
+  if(molScene.sel.length===2){
+    molScene.angle=angleBetween(molScene.vecs[molScene.sel[0]],molScene.vecs[molScene.sel[1]]);
+    $("r5ukur").textContent=fmt(molScene.angle)+"°";
+  }
+  molScene.draw();
+}
+$("lpRange").addEventListener("input",function(){
+  st.lpMoved[M().id]=true; lpUpdate(Number(this.value),true); sfx("tick"); updDone();
+});
+$("lpRange").addEventListener("change",function(){
+  var v=Number(this.value);
+  comment(v<=102 ? "Tolakan P E B sama kuat dengan P E I. Sudutnya tetrahedral ideal, 109,5 derajat." :
+          "Semakin kuat P E B menolak, semakin sempit sudut ikatannya. Sudut sekarang "+fmt(nhAngle(v/100))+" derajat.");
+});
+function setMode(mo,quiet){
+  var m=M(), lb=$("btnLp");
+  molScene.opt.mode=mo;
+  ["domain","ball","both"].forEach(function(k){ var b=$("mode_"+k); b.classList.toggle("on",k===mo); b.setAttribute("aria-pressed",k===mo?"true":"false"); });
+  lb.disabled=!m.peb||mo==="ball";
+  if(mo==="ball") st.ballSeen[m.id]=true;
+  if(!molScene.measuring) $("molHint").textContent = mo==="domain" ? "Domain elektron: PEI dan PEB sama-sama lobus" : (mo==="ball" ? "Bola-tongkat: hanya atom, inilah bentuk molekul" : "Gabungan: lobus domain dan atom");
+  if(!quiet){ sfx("tick"); comment(mo==="domain" ? "Tampilan domain. Ikatan dan P E B sama-sama ruang elektron." : (mo==="ball" ? "Tampilan bola dan tongkat. Hanya atom yang terlihat, itulah bentuk molekul." : "Tampilan gabungan.")); }
+  molScene.draw(); updDone();
+}
+["domain","ball","both"].forEach(function(k){ $("mode_"+k).onclick=function(){ setMode(k); }; });
+$("btnAxes").onclick=function(){
+  molScene.opt.axes=!molScene.opt.axes; this.classList.toggle("on",molScene.opt.axes); this.setAttribute("aria-pressed",molScene.opt.axes?"true":"false");
+  sfx("tick"); molScene.draw();
+};
+function updDone(){
+  var m=M(), meas=!!st.meas[m.id], mov=(m.peb>0)?(!!st.lpLow[m.id] && !!st.lpReal[m.id]):true, ball=!!st.ballSeen[m.id], okAll=meas&&mov&&ball, c=$("concE");
+  $("btnDone5").disabled=!okAll;
+  c.hidden=!okAll;
+  if(okAll) c.innerHTML="<b>Kesimpulan.</b> "+WHY[m.id].e;
+  if(!st.done[m.id]) $("doneMsg").textContent = !ball ? "Pilih tampilan Bola-tongkat." : (!meas ? "Ukur satu sudut (tombol Ukur sudut)." : (!mov ? "Geser penggeser PEB sampai sudutnya sekitar 107°." : ""));
+}
+function buildBentuk(){
+  var m=M(), dom=m.n+m.peb, okC=isOk("C"), okD=isOk("D");
+  $("m4mol").innerHTML=m.rumus;
+  $("lock4").hidden=okC; $("body4").hidden=!okC;
+  if(!okC){ $("lock4txt").textContent="Hitung dulu PEI dan PEB "+m.rumus+" di Misi 3, baru bentuknya bisa diramalkan."; return; }
+
+  molScene.opt.ligLabel=m.ligan; molScene.opt.ctrLabel=m.pusat;
+  molScene.opt.ctrColor=CPK[m.pusat].c; molScene.opt.ligColor=CPK[m.ligan].c; molScene.opt.mode="both"; molScene.opt.ctrR=CPK[m.pusat].s; molScene.opt.ligR=CPK[m.ligan].s;
+  molScene.vecs=(m.id==="NH3" ? nh3Vecs() : GEOM[m.n]).map(function(v){ return v.slice(); });
+  st.lpOn=true; molScene.lps=m.peb>0 ? [[0,1,0]] : [];
+  molScene.scales=[]; molScene.sel=[]; molScene.angle=null; molScene.measuring=false;
+  molScene.rx=-0.30; molScene.ry=0.62; molScene.zoom=1;
+  $("btnMeasure").classList.remove("on"); $("btnMeasure").setAttribute("aria-pressed","false");
+  $("molCv").classList.remove("cross"); $("molHint").textContent="Seret untuk memutar";
+  $("viewerWrap").hidden=true;
+
+  function reveal(){
+    $("viewerWrap").hidden=false;
+    $("r5not").textContent=m.notasi; $("r5dom").textContent=GNAME[dom];
+    $("r5bentuk").textContent=m.bentuk; $("r5sudut").textContent=m.sudut;
+    $("r5ukur").textContent="belum diukur"; $("macroTxt").textContent=m.makro;
+    $("doneMsg").textContent = st.done[m.id] ? "Sudah tercatat." : "";
+    $("molWhy").textContent = WHY[m.id].alasan;
+    molScene.opt.axes=false; $("btnAxes").classList.remove("on"); $("btnAxes").setAttribute("aria-pressed","false");
+    var lb=$("btnLp"); lb.disabled=!m.peb; lb.classList.toggle("on",!!m.peb); lb.setAttribute("aria-pressed",m.peb?"true":"false");
+    lb.title = m.peb ? "Tampilkan atau sembunyikan PEB" : m.rumus+" tidak punya PEB pada atom pusat";
+    $("lgCtr").style.background=CPK[m.pusat].c; $("lgLig").style.background=CPK[m.ligan].c;
+    $("repWhy").innerHTML = m.peb>0 ? "PEB hanya ditarik <b>satu inti</b>, jadi awannya lebih lebar dan lebih dekat ke atom pusat. Itu sebabnya ia menolak lebih kuat daripada PEI, yang ditarik <b>dua inti</b> dan terkumpul di antara atom." : "SO₃ tidak punya PEB pada atom pusat, jadi hanya ada tolakan PEI–PEI. Ketiganya sama kuat dan terdorong merata hingga 120°.";
+    var lc=$("lpCtl"); lc.hidden=!(m.id==="NH3");
+    if(m.id==="NH3"){ $("lpRange").value=100; lpUpdate(100); }
+    setMode("both",true);
+    setTimeout(function(){ molScene.resize(); },30);
+  }
+  var lbls=[2,3,4,5,6];
+  var steps=[
+   {q:"Dengan "+dom+" domain, ke susunan ruang mana mereka saling terjauh?",
+    o:lbls.map(function(n){ return {t:GNAME[n]+" ("+GANGLE[n]+")", ok:n===dom,
+      why: n===dom ? dom+" domain tersusun "+GNAME[dom].toLowerCase()+", sudutnya "+GANGLE[dom]+"." : GNAME[n]+" adalah susunan untuk "+n+" domain. Jumlahkan PEI + PEB dulu."}; })},
+   {q:"Dari "+dom+" domain itu, berapa yang berupa <b>atom</b> (terlihat)?",
+    o:numOpts(m.n,[dom,1,2,6],function(v){ return v+" domain"; },
+      m.n+" domain berupa atom"+(m.peb>0?"; sisanya PEB yang tidak terlihat.":"; semuanya terlihat."),
+      function(v){ return (v===dom && m.peb>0) ? "Itu semua domain, termasuk PEB. Apakah PEB berupa atom?" : "Hanya domain PEI yang berisi atom. Hitung PEI-nya."; })},
+   {q:"Jika hanya atom yang terlihat, bentuk molekul <b>"+m.rumus+"</b> adalah…",
+    o:["Piramida trigonal","Trigonal planar","Tetrahedral","Bentuk V (bengkok)"].map(function(t){ return {t:t, ok:t===m.bentuk,
+      why: t===m.bentuk ? (m.peb>0 ? "Domainnya tetrahedral, tetapi satu PEB tidak terlihat, jadi atom-atomnya membentuk piramida." : "Tiga domain, semuanya atom, tersusun datar.") :
+           t==="Tetrahedral" ? (m.peb>0 ? "Itu susunan <b>domain</b> (termasuk PEB). Bentuk molekul hanya menghitung posisi atom." : "Tetrahedral butuh 4 domain, "+m.rumus+" hanya punya "+dom+".") :
+           t==="Bentuk V (bengkok)" ? "Bentuk V untuk 2 atom terikat. Di sini ada "+m.n+" atom terikat." :
+           (m.peb>0 ? "Bentuk datar terjadi bila tidak ada PEB. Di sini PEB mendorong atom keluar dari satu bidang." : "Piramida muncul bila ada PEB. Di sini PEB = 0, jadi atom sebidang.")}; })}
+  ];
+  steps.splice(0,2);
+  renderGuided("askD","<b>"+m.pusat+"</b> pada "+m.rumus+" punya <b>"+m.n+" PEI</b> dan <b>"+m.peb+" PEB</b>, jadi <b>"+dom+" domain</b> tersusun "+GNAME[dom].toLowerCase()+". Ramalkan bentuk <b>molekulnya</b> (posisi atom saja) sebelum model 3D muncul.",steps,null,function(){
+    setOk("D"); reveal();
+  },okD);
+  if(okD) reveal();
+}
+function molFrame(dt){
+  if(molScene.spin && !molScene.drag && !reduce) molScene.ry += dt*0.28;
+  molScene.draw();
+}
+$("btnSpin5").onclick=function(){
+  molScene.spin=!molScene.spin;
+  this.classList.toggle("on",molScene.spin); this.setAttribute("aria-pressed",molScene.spin);
+};
+$("btnLp").onclick=function(){
+  var m=M(); if(!m.peb) return;
+  st.lpOn=!st.lpOn; molScene.lps=st.lpOn?[[0,1,0]]:[];
+  this.classList.toggle("on",st.lpOn); this.setAttribute("aria-pressed",st.lpOn?"true":"false");
+  if(!molScene.measuring) $("molHint").textContent = st.lpOn ? "Dengan PEB: susunan domain (tetrahedral)" : "Tanpa PEB: yang tampak hanya atom, inilah bentuk molekul";
+  sfx("tick"); if(!st.lpOn){ st.ballSeen[m.id]=true; updDone(); }
+  comment(st.lpOn ? "PEB tampak lagi. Empat domain tersusun tetrahedral." : "PEB disembunyikan. Tinggal tiga atom H, bentuknya piramida trigonal.");
+  molScene.draw();
+};
+$("btnReset5").onclick=function(){ molScene.rx=-0.30; molScene.ry=0.62; molScene.zoom=1; molScene.draw(); };
+$("btnZoomIn").onclick=function(){ molScene.zoom=Math.min(2.2,(molScene.zoom||1)*1.2); sfx("tick"); molScene.draw(); };
+$("btnZoomOut").onclick=function(){ molScene.zoom=Math.max(0.6,(molScene.zoom||1)/1.2); sfx("tick"); molScene.draw(); };
+$("btnMeasure").onclick=function(){
+  molScene.measuring=!molScene.measuring;
+  if(molScene.measuring && molScene.spin){ molScene.spin=false; $("btnSpin5").classList.remove("on"); $("btnSpin5").setAttribute("aria-pressed","false"); }
+  this.classList.toggle("on",molScene.measuring); this.setAttribute("aria-pressed",molScene.measuring);
+  $("molCv").classList.toggle("cross",molScene.measuring);
+  molScene.sel=[]; molScene.angle=null;
+  $("molHint").textContent = molScene.measuring ? "Klik dua atom terikat" : "Seret untuk memutar";
+  $("r5ukur").textContent = molScene.measuring ? "pilih dua atom" : "belum diukur";
+  molScene.draw();
+};
+$("molCv").addEventListener("click",function(e){
+  if(!molScene.measuring) return;
+  var r=this.getBoundingClientRect(), i=molScene.pick(e.clientX-r.left,e.clientY-r.top);
+  if(i<0) return;
+  var k=molScene.sel.indexOf(i);
+  if(k!==-1) molScene.sel.splice(k,1);
+  else { molScene.sel.push(i); if(molScene.sel.length>2) molScene.sel.shift(); }
+  if(molScene.sel.length===2){
+    molScene.angle=angleBetween(molScene.vecs[molScene.sel[0]],molScene.vecs[molScene.sel[1]]);
+    $("r5ukur").textContent=fmt(molScene.angle)+"°"; st.meas[M().id]=true; st.measVal[M().id]=fmt(molScene.angle)+"°"; updDone(); sfx("ok");
+    comment("Sudutnya "+fmt(molScene.angle)+" derajat. "+(M().peb>0 ? "Lebih kecil dari 109,5 derajat, karena P E B menolak lebih kuat dan menekan ikatan." : "Tepat 120 derajat, karena tidak ada P E B dan tolakannya sama kuat."));
+  }else{ molScene.angle=null; $("r5ukur").textContent="pilih dua atom"; }
+  molScene.draw();
+});
+$("btnDone5").onclick=function(){
+  var m=M(), other=null, i;
+  st.done[m.id]=true; sfx("ok");
+  for(i=0;i<MOL.length;i++) if(MOL[i].id!==m.id) other=MOL[i];
+  if(doneCount()>=MOL.length){
+    unlock(5); setNext("next4",5,NEXTDEF[3].lab);
+    $("doneMsg").textContent = m.rumus+" selesai. Kedua molekul tuntas, Misi 5 terbuka.";
+  } else {
+    $("doneMsg").textContent = m.rumus+" selesai. Lanjutkan dengan "+other.rumus+" lewat pilihan molekul di atas.";
+  }
+  refresh();
+};
+
+/* =========================================================
+   MISI 5 · JAWAB MASALAHMU
+   ========================================================= */
+var HYPTXT={
+  sama:"Dugaan awalmu: bentuknya <b>sama</b>. Buktimu menunjukkan sebaliknya: NH₃ piramida trigonal, SO₃ trigonal planar.",
+  beda:"Dugaan awalmu: bentuknya <b>berbeda</b>. Terbukti. Sekarang kamu bisa menjelaskan sebabnya.",
+  ragu:"Kamu memilih menyelidiki dulu. Hasilnya jelas: NH₃ piramida trigonal, SO₃ trigonal planar."
+};
+var ALUR=[
+  {t:"Tentukan elektron valensi atom pusat, lalu hitung PEI (jumlah atom terikat)", h:"Data apa yang kamu butuhkan sebelum bisa menghitung PEB?"},
+  {t:"Hitung PEB = ( EV − elektron berikatan ) ÷ 2", h:"PEB baru bisa dihitung setelah data awal dan PEI ada."},
+  {t:"Jumlahkan PEI + PEB menjadi domain, lalu tentukan susunan ruangnya", h:"Domain butuh PEI dan PEB sekaligus."},
+  {t:"Lihat posisi atom saja (PEI) untuk menyebut bentuk molekul", h:"Bentuk molekul disebut paling akhir, setelah susunan domain diketahui."}
+];
+function buildAlur(){
+  var box=$("alurBox"), fb=$("alurFb"), order=[], i;
+  box.innerHTML=""; fb.hidden=true; st.alurN=0; st.alur=false;
+  for(i=0;i<ALUR.length;i++) order.push(i);
+  shuf(order);
+  order.forEach(function(idx){
+    var b=document.createElement("button");
+    b.innerHTML='<span class="num"></span><span>'+ALUR[idx].t+'</span>';
+    b.onclick=function(){
+      if(b.disabled) return;
+      if(idx===st.alurN){
+        b.classList.add("right"); b.disabled=true; sfx("tick");
+        el(".num",b).textContent=(st.alurN+1);
+        st.alurN++;
+        if(st.alurN===ALUR.length){
+          st.alur=true; fb.hidden=false; fb.className="fb ok";
+          fb.innerHTML="<b>Alur lengkap.</b> Alur inilah yang kamu pakai untuk NH₃ dan SO₃, dan berlaku untuk molekul lain.";
+          checkFinish(); updCapai();
+        } else { fb.hidden=true; }
+      } else {
+        b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
+        fb.hidden=false; fb.className="fb no";
+        fb.innerHTML="<b>Belum urut.</b> "+ALUR[st.alurN].h;
+      }
+    };
+    box.appendChild(b);
+  });
+}
+$("btnAlurReset").onclick=function(){ buildAlur(); };
+
+var apScene = new Scene($("apCv"),{ratio:0.82,maxH:400,mode:"both"});
+var APH=52.25*Math.PI/180;
+var AP={
+ CH4:{rumus:"CH₄",pusat:"C",ligan:"H",ev:4,n:4,peb:0,notasi:"AX₄",sus:"Tetrahedral",bentuk:"Tetrahedral",sudut:"109,5°",
+   vecs:function(){ return GEOM[4].map(function(v){ return v.slice(); }); }, lps:function(){ return []; },
+   info:"C punya 4 elektron valensi dan mengikat 4 atom H dengan ikatan tunggal.",
+   ph:"PEB = ( EV − elektron berikatan ) ÷ 2 = ( 4 − 4 ) ÷ 2",
+   why:"Empat PEI saling menolak sama kuat, sehingga tersebar ke sudut-sudut tetrahedron. Tanpa PEB, bentuk molekul sama dengan susunan domainnya."},
+ H2O:{rumus:"H₂O",pusat:"O",ligan:"H",ev:6,n:2,peb:2,notasi:"AX₂E₂",sus:"Tetrahedral",bentuk:"Bengkok (bentuk V)",sudut:"104,5°",
+   vecs:function(){ return [[Math.sin(APH),-Math.cos(APH),0],[-Math.sin(APH),-Math.cos(APH),0]]; },
+   lps:function(){ return [[0,0.6,0.8],[0,0.6,-0.8]]; },
+   info:"O punya 6 elektron valensi dan mengikat 2 atom H dengan ikatan tunggal.",
+   ph:"PEB = ( EV − elektron berikatan ) ÷ 2 = ( 6 − 2 ) ÷ 2",
+   why:"Ada 4 domain (2 PEI dan 2 PEB) yang tersusun tetrahedral. Kedua PEB tidak tampak sebagai atom, jadi 2 atom H membentuk bentuk V. Dua PEB menolak lebih kuat daripada PEI sehingga sudutnya menyempit menjadi 104,5°."}
+};
+function apIn(){ var id=st.apSel; if(!st.apIn[id]) st.apIn[id]={pei:0,peb:0}; return st.apIn[id]; }
+function apRender(){
+  var id=st.apSel, d=AP[id], v=apIn(), ok=!!st.ap[id];
+  $("apInfo").textContent=d.info;
+  $("apPei").textContent=v.pei; $("apPeb").textContent=v.peb;
+  ["apPeiM","apPeiP","apPebM","apPebP"].forEach(function(k){ $(k).disabled=ok; });
+  $("btnApCheck").disabled=ok;
+  $("apRes").hidden=!ok;
+  var box=$("apPick"); box.innerHTML='<span class="lbl">Molekul</span>';
+  Object.keys(AP).forEach(function(k){
+    var b=document.createElement("button"); b.className="mol-btn"+(k===id?" active":""); b.innerHTML=AP[k].rumus+(st.ap[k]?'<span class="tick">✓</span>':"");
+    b.onclick=function(){ st.apSel=k; $("apFb").hidden=true; apRender(); };
+    box.appendChild(b);
+  });
+  apScene.opt.ctrLabel=d.pusat; apScene.opt.ligLabel=d.ligan;
+  apScene.opt.ctrColor=CPK[d.pusat].c; apScene.opt.ligColor=CPK[d.ligan].c; apScene.opt.ctrR=CPK[d.pusat].s; apScene.opt.ligR=CPK[d.ligan].s;
+  if(ok){
+    apScene.vecs=d.vecs(); apScene.lps=d.lps(); apScene.scales=[];
+    $("apDom").textContent=(d.n+d.peb)+" ("+d.n+" PEI + "+d.peb+" PEB)"; $("apNot").textContent=d.notasi; $("apSus").textContent=d.sus;
+    $("apBen").textContent=d.bentuk; $("apSud").textContent=d.sudut;
+    $("apHint").textContent="Seret untuk memutar";
+  } else { apScene.vecs=[]; apScene.lps=[]; apScene.scales=[]; $("apHint").textContent="Tentukan PEI dan PEB dulu"; }
+  apScene.sel=[]; apScene.angle=null; apScene.draw();
+  apPattern();
+}
+function apPattern(){
+  var ready=!!(st.ap.CH4 && st.ap.H2O); $("apPattern").hidden=!ready;
+  if(!ready) return;
+  var rows=[["CH₄ · 0 PEB",109.5,"109,5°"],["NH₃ · 1 PEB",107,"107°"],["H₂O · 2 PEB",104.5,"104,5°"]], h="";
+  rows.forEach(function(r){ h+='<div class="pb"><span>'+r[0]+'</span><span class="bar" style="width:'+Math.round((r[1]-88)/(110-88)*100)+'%"></span><span class="a">'+r[2]+'</span></div>'; });
+  $("patBars").innerHTML=h;
+  var box=$("patOpts"), fb=$("patFb");
+  if(st.pola){ box.hidden=true; fb.hidden=false; fb.className="fb ok"; fb.innerHTML="<b>Pola ditemukan.</b> Semakin banyak PEB, semakin kuat ikatan terdesak, sehingga sudut ikatan makin kecil. Inilah pengaruh PEB pada sudut: PEB menolak lebih kuat daripada PEI."; return; }
+  box.hidden=false; box.innerHTML="";
+  [["makin kecil (menyempit)",true,""],["makin besar (melebar)",false,"Lihat batangnya: dari CH₄ ke H₂O sudutnya berkurang."],["tetap sama",false,"Angka sudutnya berbeda pada tiap molekul."]].forEach(function(o){
+    var b=document.createElement("button"); b.className="opt"; b.textContent=o[0];
+    b.onclick=function(){
+      if(o[1]){ st.pola=true; sfx("ok"); comment("Betul. Semakin banyak P E B, sudut ikatan semakin kecil."); apPattern(); updCapai(); checkFinish(); }
+      else { sfx("no"); fb.hidden=false; fb.className="fb no"; fb.innerHTML="<b>Belum tepat.</b> "+o[2]; }
+    };
+    box.appendChild(b);
+  });
+}
+function apFrame(dt){ if(apScene.spin && !apScene.drag && !reduce) apScene.ry += dt*0.28; apScene.draw(); }
+function apMode(mo){
+  apScene.opt.mode=mo;
+  ["domain","ball","both"].forEach(function(k){ var b=$("apm_"+k); b.classList.toggle("on",k===mo); b.setAttribute("aria-pressed",k===mo?"true":"false"); });
+  sfx("tick"); apScene.draw();
+}
+["domain","ball","both"].forEach(function(k){ $("apm_"+k).onclick=function(){ apMode(k); }; });
+$("apPeiM").onclick=function(){ var v=apIn(); v.pei=Math.max(0,v.pei-1); apRender(); };
+$("apPeiP").onclick=function(){ var v=apIn(); v.pei=Math.min(6,v.pei+1); apRender(); };
+$("apPebM").onclick=function(){ var v=apIn(); v.peb=Math.max(0,v.peb-1); apRender(); };
+$("apPebP").onclick=function(){ var v=apIn(); v.peb=Math.min(4,v.peb+1); apRender(); };
+$("btnApCheck").onclick=function(){
+  var id=st.apSel, d=AP[id], v=apIn(), fb=$("apFb");
+  fb.hidden=false;
+  if(v.pei!==d.n){ fb.className="fb no"; fb.innerHTML="<b>PEI belum tepat.</b> PEI sama dengan jumlah atom yang terikat pada atom pusat."; sfx("no"); return; }
+  if(v.peb!==d.peb){ fb.className="fb no"; fb.innerHTML="<b>PEB belum tepat.</b> Hitung dengan rumus: "+d.ph+"."; sfx("no"); return; }
+  st.ap[id]=true; fb.className="fb ok"; fb.innerHTML="<b>Tepat.</b> "+d.why;
+  sfx("win"); comment(d.rumus+" punya "+d.n+" P E I dan "+d.peb+" P E B. "+d.why);
+  apRender(); updCapai(); checkFinish();
+};
+
+function buildAkhir(){
+  var tb=$("sumBody"); tb.innerHTML="";
+  MOL.forEach(function(m){
+    var tr=document.createElement("tr");
+    tr.innerHTML='<td class="n">'+m.rumus+'</td><td class="n">'+m.n+'</td><td class="n">'+m.peb+'</td><td class="n">'+(m.n+m.peb)+
+      '</td><td class="n">'+m.notasi+'</td><td>'+m.bentuk+'</td><td class="n">'+m.sudut+'</td>';
+    tb.appendChild(tr);
+  });
+  $("hypCheck").innerHTML = HYPTXT[st.hyp] || "Bandingkan hasil kedua molekul pada tabel di bawah.";
+  if(!$("alurBox").children.length) buildAlur();
+  apRender(); updCapai(); setTimeout(function(){ apScene.resize(); },40);
+  fillPrint();
+}
+
+function capaiState(){
+  var a1=!!(st.ok["NH3-C"] && st.ok["SO3-C"]), a2=!!(st.done.NH3 && st.done.SO3), a3=!!(st.lpReal.NH3 && st.pola);
+  var tp=!!(st.tulis && st.alur), cp=!!(st.ap.CH4 && st.ap.H2O && tp);
+  return {a1:a1,a2:a2,a3:a3,tp:tp,cp:cp,all:a1&&a2&&a3&&tp&&cp};
+}
+function updCapai(){
+  var c=capaiState(), L=[
+    [c.a1,"<b>Indikator 1.</b> Menentukan jumlah PEI dan PEB: kamu merakit NH₃ dan SO₃ sendiri."],
+    [c.a2,"<b>Indikator 2.</b> Menentukan bentuk molekul dari susunan domain: kamu menguji model 3D NH₃ dan SO₃."],
+    [c.a3,"<b>Indikator 3.</b> Menunjukkan pengaruh PEB terhadap sudut ikatan: kamu menggeser tolakan PEB dan menemukan polanya."],
+    [c.tp,"<b>Tujuan pembelajaran.</b> Menjelaskan pengaruh PEI dan PEB terhadap bentuk NH₃ dan SO₃: penjelasan tertulis dan alur berpikirmu lengkap."],
+    [c.cp,"<b>Capaian pembelajaran.</b> Menggunakan VSEPR untuk menjelaskan bentuk molekul sederhana: kamu juga berhasil pada CH₄ dan H₂O."]
+  ], h="";
+  L.forEach(function(x){ h+='<div class="ci'+(x[0]?" ok":"")+'"><i>'+(x[0]?"✓":"")+"</i><span>"+x[1]+"</span></div>"; });
+  $("capaiList").innerHTML=h;
+}
+function checkFinish(){
+  var ok=capaiState().all; updCapai();
+  $("doneBanner").hidden=!ok;
+  if(ok){
+    $("doneText").textContent=(st.nama?st.nama+", kamu":"Kamu")+" merakit, menguji, dan menjelaskan bentuk NH₃ dan SO₃, lalu menerapkannya pada CH₄ dan H₂O.";
+    fillPrint();
+    if(!st.finish){ st.finish=true; refresh(); sfx("win"); comment("Misi tuntas. Kamu sudah menjelaskan pengaruh P E B terhadap bentuk molekul."); }
+  }
+}
+
+/* tulis penjelasan sendiri */
+var KW=[
+ {k:"PEB (pasangan elektron bebas)",re:/\bpeb\b|pasangan elektron bebas/i},
+ {k:"domain",re:/domain|daerah elektron/i},
+ {k:"tolak-menolak",re:/tolak|menjauh|repulsi/i},
+ {k:"PEB tidak terlihat sebagai atom",re:/tidak (terlihat|tampak|kelihatan)|bukan atom|hanya atom|posisi atom/i},
+ {k:"pengaruh PEB pada sudut",re:/sudut|menyempit|mengecil|lebih kecil|107|109/i}
+];
+$("btnTulis").onclick=function(){
+  var t=$("tulisIn").value.trim(), box=$("kwBox");
+  box.hidden=false; box.innerHTML="";
+  if(t.length<30){ var w=document.createElement("span"); w.textContent="Tulis dulu minimal dua kalimat."; box.appendChild(w); return; }
+  var got=0;
+  KW.forEach(function(x){
+    var on=x.re.test(t); if(on) got++;
+    var sp=document.createElement("span"); sp.className=on?"on":""; sp.textContent=(on?"✓ ":"")+x.k; box.appendChild(sp);
+  });
+  var has=function(i){ return KW[i].re.test(t); };
+  var pass = has(0) && has(1) && has(2) && (has(3) || has(4));
+  var note=document.createElement("p"); note.style.cssText="flex-basis:100%;font-size:13.4px;margin-top:2px";
+  note.textContent = pass ? "Penjelasanmu sudah memuat konsep kunci." : "Belum lengkap. Penjelasan yang utuh menyebut PEB, domain, tolakan, dan pengaruh PEB pada bentuk atau sudut. Tambahkan yang belum bertanda ✓, lalu periksa lagi.";
+  box.appendChild(note);
+  $("btnContoh").hidden=false;
+  st.tulis=pass; checkFinish(); updCapai();
+};
+$("btnContoh").onclick=function(){
+  var b=$("contohBox"); b.hidden=false; b.className="fb ok";
+  b.innerHTML="<b>Contoh jawaban.</b> NH₃ punya 3 PEI dan 1 PEB (4 domain, tersusun tetrahedral). PEB ikut menolak, lebih kuat daripada PEI, tetapi tidak terlihat sebagai atom, sehingga 3 atom H membentuk piramida trigonal dan sudutnya menyempit dari 109,5° menjadi sekitar 107°. SO₃ punya 3 PEI dan 0 PEB (3 domain), semuanya atom, sehingga bentuknya trigonal planar. Jumlah atom terikat sama, tetapi ada atau tidaknya PEB membuat bentuknya berbeda.";
+};
+
+/* identitas & cetak */
+$("inNama").oninput=function(){ st.nama=this.value.trim(); };
+$("inKelas").oninput=function(){ st.kelas=this.value.trim(); };
+function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function fillPrint(){
+  var hy={sama:"sama",beda:"berbeda",ragu:"belum tahu"}[st.hyp]||"-", rows="", goal="", i;
+  MOL.forEach(function(m){
+    var dom=m.n+m.peb;
+    rows+='<tr><td>'+m.rumus+'<br><span style="font-weight:400">'+m.nama+'</span></td><td>'+m.n+'</td><td>'+m.peb+'</td><td>'+dom+'</td><td>'+m.notasi+'</td><td>'+GNAME[dom]+'</td><td>'+m.bentuk+'</td><td>'+m.sudut+'</td><td>'+(st.measVal[m.id]||"-")+'</td></tr>';
+  });
+  Object.keys(AP).forEach(function(k){ var d=AP[k]; if(!st.ap[k]) return;
+    rows+='<tr><td>'+d.rumus+'</td><td>'+d.n+'</td><td>'+d.peb+'</td><td>'+(d.n+d.peb)+'</td><td>'+d.notasi+'</td><td>'+d.sus+'</td><td>'+d.bentuk+'</td><td>'+d.sudut+'</td><td>-</td></tr>'; });
+  try{ var g=document.querySelectorAll("#start .goal"); if(g[1]) goal=g[1].innerHTML; }catch(e){}
+  var alur=""; ALUR.forEach(function(a){ alur+="<li>"+a.t+"</li>"; });
+  $("printSheet").innerHTML=
+    '<h1>Lembar Hasil Belajar</h1><div class="sub">Virtual Geometri Simulation · Teori VSEPR · Kelas X</div>'+
+    '<div class="id"><span><b>Nama:</b> '+esc(st.nama||"……………………………")+'</span><span><b>Kelas:</b> '+esc(st.kelas||"………………")+'</span><span><b>Tanggal:</b> '+new Date().toLocaleDateString("id-ID")+'</span></div>'+
+    (goal?'<h2>Tujuan pembelajaran</h2><div class="goalbox">'+goal+'</div>':'')+
+    '<h2>Hasil pengamatanku</h2>'+
+    '<table><thead><tr><th>Molekul</th><th>PEI</th><th>PEB</th><th>Domain</th><th>Notasi</th><th>Susunan domain</th><th>Bentuk molekul</th><th>Sudut teori</th><th>Sudut yang kuukur</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    (st.pola?'<p><b>Pola yang kutemukan:</b> CH₄ (0 PEB) 109,5° → NH₃ (1 PEB) 107° → H₂O (2 PEB) 104,5°. Semakin banyak PEB, sudut ikatan semakin kecil.</p>':'')+
+    '<h2>Dugaan awalku</h2><p>Aku menduga bentuk NH₃ dan SO₃ <b>'+hy+'</b>. Setelah simulasi, ternyata keduanya berbeda: NH₃ piramida trigonal, SO₃ trigonal planar.</p>'+
+    '<h2>Penjelasanku</h2><div class="box">'+esc($("tulisIn").value||"")+'</div>'+
+    '<h2>Alur berpikirku</h2><ol>'+alur+'</ol>'+
+    '<h2>Kesimpulan</h2><p>Bentuk molekul ditentukan oleh posisi atom-atom yang terikat, sedangkan susunan domain elektron menentukan ke mana atom-atom itu terdorong. PEB tetap menjadi domain dan menolak lebih kuat daripada PEI, tetapi tidak dihitung sebagai atom. Karena itu NH₃ (AX₃E) berbentuk piramida trigonal dengan sudut sekitar 107°, sedangkan SO₃ (AX₃) berbentuk trigonal planar dengan sudut 120°.</p>'+
+    '<div class="foot">Dibuat dari media Virtual Geometri Simulation. Dicetak pada '+new Date().toLocaleString("id-ID")+'.</div>';
+}
+$("btnPrint").onclick=function(){ fillPrint(); window.print(); };
+
+/* ukuran teks */
+var tz=1;
+function setTz(v){
+  tz=Math.max(1,Math.min(1.45,Math.round(v*100)/100));
+  document.documentElement.style.setProperty("--tz",tz);
+  $("tMin").disabled=(tz<=1); $("tPlus").disabled=(tz>=1.45);
+}
+$("tPlus").onclick=function(){ setTz(tz+0.15); };
+$("tMin").onclick=function(){ setTz(tz-0.15); };
+
+/* =========================================================
+   AUDIO PEMANDU: suara + sorotan + teks + efek bunyi
+   ========================================================= */
+var AUD={ctx:null,sfx:true,guide:false,tok:0,timer:null,spotEl:null,capTimer:null,bad:{},audio:null,eng:"",vol:0.8};
+function actx(){
+  if(AUD.ctx && AUD.ctx.state==="closed") AUD.ctx=null;
+  if(!AUD.ctx){ try{ var C=window.AudioContext||window.webkitAudioContext; if(C) AUD.ctx=new C(); }catch(e){} }
+  if(AUD.ctx && AUD.ctx.state!=="running"){ try{ var p=AUD.ctx.resume(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
+  return AUD.ctx;
+}
+["pointerdown","keydown","touchstart"].forEach(function(ev){ document.addEventListener(ev,function(){ actx(); },{passive:true,capture:true}); });
+document.addEventListener("visibilitychange",function(){ if(!document.hidden) actx(); });
+function tone(f,t0,dur,type,vol){
+  var c=actx(); if(!c) return;
+  var dead=false;
+  function go(){
+    if(dead) return;
+    try{
+      var o=c.createOscillator(), g=c.createGain(), t=c.currentTime+t0;
+      o.type=type||"sine"; o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(Math.max(0.0002,(vol||0.1)*Math.max(0.05,AUD.vol)/0.8),t+0.015); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur+0.03);
+    }catch(e){}
+  }
+  if(c.state==="running"){ go(); return; }
+  setTimeout(function(){ dead=true; },600);
+  try{ var p=c.resume(); if(p && p.then) p.then(go,function(){}); }catch(e){}
+}
+function sfx(n){
+  if(!AUD.sfx) return;
+  try{
+    if(n==="snap"){ tone(330,0,0.09,"triangle",0.14); tone(660,0.06,0.15,"sine",0.12); }
+    else if(n==="ok"){ tone(523,0,0.1,"sine",0.1); tone(784,0.09,0.17,"sine",0.1); }
+    else if(n==="no"){ tone(190,0,0.2,"triangle",0.09); }
+    else if(n==="win"){ [523,659,784,1047].forEach(function(f,i){ tone(f,i*0.11,0.22,"sine",0.11); }); }
+    else if(n==="tick"){ tone(520,0,0.05,"triangle",0.06); }
+  }catch(e){}
+}
+function strip(h){ var d=document.createElement("div"); d.innerHTML=h; return (d.textContent||"").replace(/\s+/g," ").trim(); }
+function speakFix(s){
+  return s.replace(/NH₃/g,"N H tiga").replace(/SO₃/g,"S O tiga").replace(/H₂O/g,"H dua O").replace(/°/g," derajat")
+          .replace(/\bPEI\b/g,"P E I").replace(/\bPEB\b/g,"P E B").replace(/VSEPR/g,"V S E P R")
+          .replace(/\bEV\b/g,"E V").replace(/−/g," dikurangi ").replace(/×/g," kali ").replace(/÷/g," dibagi ").replace(/=/g," sama dengan ");
+}
+function pickVoice(){
+  var v=[], i, best=null;
+  try{ v=window.speechSynthesis.getVoices()||[]; }catch(e){}
+  for(i=0;i<v.length;i++){
+    if(/^id([-_]|$)/i.test(v[i].lang)){
+      if(/google|natural|online|neural|premium|enhanced/i.test(v[i].name)) return v[i];
+      if(!best) best=v[i];
+    }
+  }
+  return best;
+}
+function capShow(txt){
+  var c=$("caption"); c.textContent=txt; c.hidden=false;
+  clearTimeout(AUD.capTimer);
+}
+function capHide(){ var c=$("caption"); if(c) c.hidden=true; clearTimeout(AUD.capTimer); }
+function clearSpot(){ if(AUD.spotEl){ AUD.spotEl.classList.remove("spot"); AUD.spotEl=null; } }
+function spot(sel){
+  clearSpot(); if(!sel) return;
+  var e=document.querySelector(sel);
+  if(!e || e.getClientRects().length===0) return;
+  e.classList.add("spot"); AUD.spotEl=e;
+  try{ e.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"}); }catch(x){}
+}
+function speechOK(){ return ("speechSynthesis" in window) && ("SpeechSynthesisUtterance" in window); }
+try{
+  if(speechOK()){
+    window.speechSynthesis.getVoices();
+    if(window.speechSynthesis.addEventListener) window.speechSynthesis.addEventListener("voiceschanged",function(){ try{ window.speechSynthesis.getVoices(); }catch(e){} });
+  }
+}catch(e){}
+(function(){
+  var v=$("audVol"); if(!v) return;
+  v.addEventListener("input",function(){ AUD.vol=Number(v.value)/100; if(AUD.audio){ try{ AUD.audio.volume=AUD.vol; }catch(e){} } });
+  v.addEventListener("change",function(){ sfx("tick"); });
+})();
+function setStatus(txt){ var s=$("audioStatus"); if(s) s.textContent=txt; }
+function splitText(text){
+  var raw=speakFix(text).match(/[^.!?]+[.!?]*/g)||[text], out=[], cur="";
+  raw.forEach(function(x){
+    x=x.trim(); if(!x) return;
+    if(cur && (cur+" "+x).length>170){ out.push(cur); cur=x; } else cur=cur ? cur+" "+x : x;
+  });
+  if(cur) out.push(cur);
+  return out;
+}
+function voiceCands(){
+  var v=[], id=[], ms=[], en=[], other=[], out=[];
+  try{ v=window.speechSynthesis.getVoices()||[]; }catch(e){}
+  v.forEach(function(x){
+    if(/^id([-_]|$)/i.test(x.lang)) id.push(x);
+    else if(/^(ms|jv|su)([-_]|$)/i.test(x.lang)) ms.push(x);
+    else if(/^en/i.test(x.lang)) en.push(x);
+    else other.push(x);
+  });
+  function rk(a){ return /google|natural|online|neural|premium|enhanced/i.test(a.name)?0:1; }
+  [id,ms,en].forEach(function(a){ a.sort(function(p,q){ return rk(p)-rk(q); }); });
+  id.slice(0,2).forEach(function(x){ out.push({k:"ws",v:x,key:"v:"+x.name+x.lang,lab:"suara Indonesia: "+x.name}); });
+  ms.slice(0,1).forEach(function(x){ out.push({k:"ws",v:x,key:"v:"+x.name+x.lang,lab:"suara Melayu "+x.name+", mirip bahasa Indonesia"}); });
+  out.push({k:"net",key:"net",lab:"suara daring"});
+  en.slice(0,2).concat(other.slice(0,1)).forEach(function(x){ out.push({k:"ws",v:x,key:"v:"+x.name+x.lang,lab:x.name+" (logat bukan Indonesia)"}); });
+  if(!v.length && speechOK()) out.push({k:"ws",v:null,key:"v:default",lab:"suara bawaan perangkat"});
+  return out.filter(function(c){ return !(AUD.bad[c.key]>=2); });
+}
+function wsSpeak(txt,tok,c,ok,done,fail){
+  var started=false, finished=false;
+  try{
+    try{ window.speechSynthesis.resume(); }catch(e){}
+    var u=new SpeechSynthesisUtterance(txt);
+    u.lang=c.v ? c.v.lang : "id-ID"; u.rate=0.92; u.pitch=1.02; u.volume=AUD.vol; if(c.v) u.voice=c.v;
+    u.onstart=function(){ started=true; ok(); };
+    u.onend=function(){ if(finished || tok!==AUD.tok) return; finished=true; if(started) done(); else fail(); };
+    u.onerror=function(ev){ if(tok!==AUD.tok) return; if(ev && (ev.error==="canceled" || ev.error==="interrupted")) return; fail(); };
+    window.speechSynthesis.speak(u);
+  }catch(x){ fail(); return; }
+  setTimeout(function(){
+    if(!started && !finished && tok===AUD.tok){ try{ window.speechSynthesis.cancel(); }catch(e){} fail(); }
+  },3500);
+}
+function netSpeak(txt,tok,c,ok,done,fail){
+  var started=false;
+  try{
+    var a=new Audio(); AUD.audio=a; a.preload="auto"; a.volume=AUD.vol;
+    a.src="https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=id&q="+encodeURIComponent(txt);
+    a.onplaying=function(){ started=true; ok(); };
+    a.onended=function(){ if(tok===AUD.tok) done(); };
+    a.onerror=function(){ if(tok===AUD.tok) fail(); };
+    var pr=a.play(); if(pr && pr.catch) pr.catch(function(){ if(tok===AUD.tok) fail(); });
+  }catch(x){ fail(); return; }
+  setTimeout(function(){ if(!started && tok===AUD.tok) fail(); },6000);
+}
+function speakPart(txt,tok,done,waited){
+  waited=waited||0;
+  var hasV=false; try{ hasV=speechOK() && (window.speechSynthesis.getVoices()||[]).length>0; }catch(e){}
+  if(speechOK() && !hasV && waited<1500){
+    setTimeout(function(){ if(tok===AUD.tok) speakPart(txt,tok,done,waited+150); },150); return;
+  }
+  var order=voiceCands();
+  function run(i){
+    if(tok!==AUD.tok) return;
+    if(i>=order.length){
+      AUD.eng="none";
+      setStatus("Tidak ada suara bahasa Indonesia di perangkat ini. Pasang lewat Pengaturan > Waktu & bahasa > Ucapan > Tambah suara, lalu buka ulang Chrome. Teks tetap tampil.");
+      AUD.timer=setTimeout(done,1200+txt.length*55); return;
+    }
+    var c=order[i], failed=false;
+    function fail(){ if(failed || tok!==AUD.tok) return; failed=true; AUD.bad[c.key]=(AUD.bad[c.key]||0)+1; run(AUD.bad[c.key]>=2 ? i+1 : i); }
+    function ok(){ if(tok!==AUD.tok) return; AUD.eng=c.key; setStatus("Pemandu berbicara ("+c.lab+")"); }
+    if(c.k==="ws") wsSpeak(txt,tok,c,ok,done,fail); else netSpeak(txt,tok,c,ok,done,fail);
+  }
+  run(0);
+}
+function speak(text,cb){
+  var tok=AUD.tok, parts=splitText(text), i=0;
+  function next(){
+    if(tok!==AUD.tok) return;
+    if(i>=parts.length){ if(cb) cb(); return; }
+    speakPart(parts[i++],tok,next);
+  }
+  setTimeout(function(){ if(tok===AUD.tok) next(); },60);
+  return true;
+}
+function stopSpeech(){
+  AUD.tok++; clearTimeout(AUD.timer);
+  if(AUD.audio){ try{ AUD.audio.pause(); AUD.audio.removeAttribute("src"); }catch(e){} AUD.audio=null; }
+  if(speechOK()){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+  clearSpot();
+}
+function setAudioUI(){
+  var play=$("btnAudioPlay"), stop=$("btnAudioStop"), status=$("audioStatus");
+  if(play) play.disabled=false;
+  if(stop) stop.disabled=!AUD.guide;
+  if(status) status.textContent = AUD.guide ? "Pemandu aktif" : "Audio tersedia";
+}
+function audioStop(silent){
+  var was=AUD.guide;
+  stopSpeech(); AUD.guide=false; capHide(); setAudioUI();
+  var status=$("audioStatus"); if(status && was && !silent) status.textContent="Pemandu dihentikan";
+}
+function comment(text){
+  if(!AUD.guide) return;
+  stopSpeech(); capShow(text);
+  var tok=AUD.tok;
+  var done=function(){ if(tok===AUD.tok) AUD.capTimer=setTimeout(capHide,900); };
+  if(!speak(text,done)) AUD.capTimer=setTimeout(capHide,2500+text.length*45);
+}
+var CUES={
+  "1":[{sel:".duel",t:"Dua molekul ini sama-sama mengikat tiga atom. Menurutmu, apakah bentuknya sama?"},
+       {sel:"#ask1",t:"Pilih dugaanmu. Nanti kita buktikan bersama."}],
+  "2":[{sel:"#simCv",t:"Setiap titik adalah pasangan elektron. Muatannya sama, jadi saling menolak."},
+       {sel:"#simChips",t:"Pilih jumlah pasangannya, lalu tekan acak ulang. Perhatikan, susunan akhirnya selalu sama."},
+       {sel:"#simAngle",t:"Amati sudut terkecilnya. Coba minimal tiga jumlah yang berbeda."}],
+  "3":[{sel:"#atomCards",t:"Lihat inti atom berisi proton merah dan neutron abu-abu. Elektron mengorbit di kulit, dan yang emas di kulit terluar adalah elektron valensi."},
+       {sel:"#lewisSvg",t:"Tiap atom membawa elektron valensinya: titik emas dan biru. Seret atom pusat ke area rakit, lalu seret atom lain sampai elektronnya berpasangan menjadi ikatan."},
+       {sel:"#evBar",t:"Perhatikan elektron valensi atom pusat. Yang dipakai berikatan menjadi P E I. Yang tersisa berpasangan menjadi P E B."}],
+  "4":[{sel:"#askD",t:"Jumlahkan P E I dan P E B, lalu ramalkan bentuk molekulnya."},
+       {sel:"#molCv",t:"Putar model dengan menyeret. Tekan ukur sudut, lalu pilih dua atom."},
+       {sel:"#btnLp",t:"Coba sembunyikan P E B. Yang tersisa hanya atom, itulah bentuk molekul."},
+       {sel:"#lpCtl",t:"Geser penggeser ini. Semakin kuat P E B menolak, semakin sempit sudut ikatannya."},
+       {sel:"#repPanel",t:"Urutan tolakan: P E B dengan P E B paling kuat, lalu P E B dengan P E I, lalu P E I dengan P E I."}],
+  "5":[{sel:"#sumBody",t:"Bandingkan kedua molekul. Jumlah atom terikatnya sama, tetapi ada atau tidaknya P E B membuat bentuknya berbeda."},
+       {sel:"#applyBox",t:"Terapkan alur yang sama pada metana dan air. Tentukan P E I dan P E B, lalu lihat bentuknya dan temukan pola sudutnya."},
+       {sel:"#tulisBox",t:"Tuliskan penjelasanmu dengan bahasamu sendiri."},
+       {sel:"#capaiBox",t:"Di sini terlihat capaian belajarmu. Semua harus bertanda centang."}]
+};
+function runTour(){
+  var cues=CUES[st.view]||CUES["1"], i=0, tok=AUD.tok;
+  function next(){
+    if(tok!==AUD.tok) return;
+    if(i>=cues.length){ clearSpot(); capHide(); setAudioUI(); return; }
+    var c=cues[i++]; spot(c.sel); capShow(c.t);
+    if(!speak(c.t,function(){ AUD.timer=setTimeout(next,450); })) AUD.timer=setTimeout(next,1800+c.t.length*55);
+  }
+  next();
+}
+function audioPlay(){
+  stopSpeech(); AUD.guide=true;
+  var play=$("btnAudioPlay"), stop=$("btnAudioStop"), status=$("audioStatus");
+  play.disabled=true; stop.disabled=false;
+  status.textContent = "Menyiapkan suara…";
+  actx(); runTour();
+}
+window.addEventListener("pagehide",function(){ audioStop(true); });
+document.addEventListener("visibilitychange",function(){ if(document.hidden) audioStop(true); });
+$("btnAudioPlay").addEventListener("click",audioPlay);
+$("btnAudioStop").addEventListener("click",function(){ audioStop(false); });
+$("btnSfx").addEventListener("click",function(){
+  AUD.sfx=!AUD.sfx; this.classList.toggle("on",AUD.sfx); this.setAttribute("aria-pressed",AUD.sfx?"true":"false");
+  if(AUD.sfx){ actx(); sfx("tick"); }
+});
+
+/* =========================================================
+   NAVIGASI & KEMAJUAN
+   ========================================================= */
+function buildMolPick(){
+  var box=$("molPick");
+  box.innerHTML='<span class="lbl">Molekul</span>';
+  MOL.forEach(function(m){
+    var b=document.createElement("button");
+    b.className="mol-btn"+(m.id===st.mol?" active":"");
+    b.innerHTML=m.rumus+(st.done[m.id]?'<span class="tick">✓</span>':"");
+    b.onclick=function(){
+      if(st.mol===m.id) return;
+      st.mol=m.id;
+      if(st.view==="3") buildHitung(); else if(st.view==="4") buildBentuk();
+      refresh();
+    };
+    box.appendChild(b);
+  });
+}
+function go(v){
+  audioStop(true); st.drag=null; document.body.classList.remove("dragging");
+  v=String(v);
+  if(Number(v)>st.unlocked) v=String(st.unlocked);
+  st.view=v;
+  var i; for(i=1;i<=5;i++) $("v"+i).hidden=(String(i)!==v);
+  $("crumb").textContent="MISI "+v+" · "+NAMA[Number(v)-1].toUpperCase();
+  $("molPick").hidden=!(v==="3"||v==="4");
+  if(v==="2") setTimeout(function(){ sim.resize(); },30);
+  if(v==="3") buildHitung();
+  if(v==="4") buildBentuk();
+  if(v==="5") buildAkhir();
+  window.scrollTo(0,0);
+  refresh();
+}
+function refresh(){
+  var pct=Math.round(((st.unlocked-1)/4)*70 + (doneCount()/MOL.length)*30);
+  if(st.finish) pct=100; else pct=Math.min(pct,95);
+  $("progFill").style.width=pct+"%";
+  $("progPct").textContent=pct+"%";
+  $("progMol").textContent=doneCount()+" dari "+MOL.length+" molekul";
+  Array.prototype.forEach.call($("stepNav").children,function(b){
+    var n=Number(b.getAttribute("data-go"));
+    b.classList.toggle("active", String(n)===st.view);
+    b.classList.toggle("locked", n>st.unlocked);
+    b.classList.toggle("done", n<st.unlocked);
+    b.disabled = n>st.unlocked;
+  });
+  buildMolPick();
+  syncNext();
+}
+
+/* -- istilah -- */
+function closeTerms(except){
+  Array.prototype.forEach.call(document.querySelectorAll(".term.open"),function(x){
+    if(x!==except){ x.classList.remove("open"); x.setAttribute("aria-expanded","false"); }
+  });
+}
+function placePop(t){
+  var p=el(".pop",t); if(!p) return;
+  p.classList.remove("below"); p.style.left="0px";
+  var vw=document.documentElement.clientWidth, m=10, tr=t.getBoundingClientRect(), pw=p.offsetWidth, left=0;
+  if(tr.left+pw>vw-m) left=Math.max(vw-m-pw-tr.left, m-tr.left);
+  else if(tr.left<m) left=m-tr.left;
+  p.style.left=left+"px";
+  if(tr.top-p.offsetHeight-12<64) p.classList.add("below");
+}
+function initTerms(){
+  Array.prototype.forEach.call(document.querySelectorAll(".term"),function(t){
+    t.setAttribute("role","button"); t.setAttribute("tabindex","0"); t.setAttribute("aria-expanded","false");
+  });
+}
+document.addEventListener("click",function(e){
+  var t=e.target.closest ? e.target.closest(".term") : null;
+  closeTerms(t);
+  if(!t) return;
+  if(e.target.closest(".pop")) return;
+  var open=!t.classList.contains("open");
+  t.classList.toggle("open",open); t.setAttribute("aria-expanded",open?"true":"false");
+  if(open) placePop(t);
+});
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape"){ closeTerms(null); return; }
+  if((e.key==="Enter" || e.key===" ") && e.target && e.target.classList && e.target.classList.contains("term")){
+    e.preventDefault(); e.target.click();
+  }
+});
+window.addEventListener("resize",function(){ var o=document.querySelector(".term.open"); if(o) placePop(o); });
+Array.prototype.forEach.call(document.querySelectorAll("[data-go]"),function(b){
+  b.addEventListener("click",function(){ go(b.getAttribute("data-go")); });
+});
+$("sideToggle").onclick=function(){ $("side").classList.toggle("collapsed"); };
+$("btnHome").onclick=function(){
+  audioStop(true);
+  $("app").hidden=true; $("start").classList.remove("hide");
+  $("btnLanjut").hidden=false;
+  setTimeout(function(){ hero.resize(); },30);
+};
+$("btnMulai").onclick=function(){ enterApp("1"); };
+$("btnLanjut").onclick=function(){ enterApp(st.view||"1"); };
+function enterApp(v){
+  $("start").classList.add("hide"); $("app").hidden=false;
+  if(window.innerWidth<=940) $("side").classList.add("collapsed");
+  go(v);
+  setTimeout(function(){ sim.resize(); molScene.resize(); },40);
+}
+
+/* =========================================================
+   GELUNG ANIMASI & PENYALAAN
+   ========================================================= */
+var last=0;
+function tick(ts){
+  var dt=(ts-last)/1000; last=ts;
+  if(!isFinite(dt)||dt<0) dt=0; if(dt>0.06) dt=0.06;
+  if(!$("start").classList.contains("hide")) heroFrame(dt);
+  else if(st.view==="2") simFrame(dt);
+  else if(st.view==="4" && !$("body4").hidden && !$("viewerWrap").hidden) molFrame(dt);
+  else if(st.view==="5") apFrame(dt);
+  requestAnimationFrame(tick);
+}
+function init(){
+  readPal();
+  hero.vecs=GEOM[4].map(function(v){ return v.slice(); });
+  hero.scales=[1,1,1,1];
+  $("heroName").textContent=GNAME[4];
+  $("heroSub").textContent="4 domain elektron · "+GANGLE[4];
+  hero.resize();
+  buildSimChips(); simScatter(); sim.resize();
+  setTz(1); buildHyp(); buildAsk2(); buildMolPick(); syncNext(); refresh();
+  initTerms();
+  hero.draw(); sim.draw(); molScene.draw();
+  requestAnimationFrame(tick);
+}
+init();
+})();
+</script>
+</body>
+</html>
